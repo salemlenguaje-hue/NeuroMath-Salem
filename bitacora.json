@@ -1,0 +1,276 @@
+[
+  {
+    "fecha": "2026-10-21T15:10:08.029265",
+    "parametros": {
+      "n_filas": 16,
+      "n_cols": 16,
+      "n_agentes": 16,
+      "gamma_som": 0.2,
+      "gamma_ef": 0.5,
+      "sigma": 0.2,
+      "magnitud": 1,
+      "n_perturbaciones": 200,
+      "n_ciclos_equilibrio": 1000,
+      "n_pasos_propagacion": 50
+    },
+    "alpha": 1.239,
+    "diagnostico": " CRÍTICO (Ley de potencia)",
+    "total_perturbaciones": 200
+  },
+  {
+    "fecha": "2026-10-21T15:11:11.006163",
+    "parametros": {
+      "n_filas": 16,
+      "n_cols": 16,
+      "n_agentes": 8,
+      "gamma_som": 0.2,
+      "gamma_ef": 0.5,
+      "sigma": 0.2,
+      "magnitud": 1,
+      "n_perturbaciones": 200,
+      "n_ciclos_equilibrio": 1000,
+      "n_pasos_propagacion": 50
+    },
+    "alpha": 1.239,
+    "diagnostico": " CRÍTICO (Ley de potencia)",
+    "total_perturbaciones": 200
+  },
+  {
+    "fecha": "2026-10-21T15:12:11.738051",
+    "parametros": {
+      "n_filas": 16,
+      "n_cols": 16,
+      "n_agentes": 8,
+      "gamma_som": 0.4,
+      "gamma_ef": 0.5,
+      "sigma": 0.2,
+      "magnitud": 1,
+      "n_perturbaciones": 200,
+      "n_ciclos_equilibrio": 1000,
+      "n_pasos_propagacion": 50
+    },
+    "alpha": 1.211,
+    "diagnostico": " CRÍTICO (Ley de potencia)",
+    "total_perturbaciones": 200
+  },
+  {
+    "fecha": "2026-10-21T15:14:30.901715",
+    "parametros": {
+      "n_filas": 32,
+      "n_cols": 32,
+      "n_agentes": 8,
+      "gamma_som": 0.4,
+      "gamma_ef": 0.5,
+      "sigma": 0.2,
+      "magnitud": 1,
+      "n_perturbaciones": 200,
+      "n_ciclos_equilibrio": 1000,
+      "n_pasos_propagacion": 50
+    },
+    "alpha": 1.163,
+    "diagnostico": " CRÍTICO (Ley de potencia)",
+    "total_perturbaciones": 200
+  },
+  {
+    "fecha": "2026-10-21T15:21:55.205863",
+    "parametros": {
+      "n_filas": 32,
+      "n_cols": 32,
+      "n_agentes": 8,
+      "gamma_som": 0.4,
+      "gamma_ef": 1,
+      "sigma": 0.2,
+      "magnitud": 1,
+      "n_perturbaciones": 200,
+      "n_ciclos_equilibrio": 1000,
+      "n_pasos_propagacion": 50
+    },
+    "alpha": 1.212,
+    "diagnostico": " CRÍTICO (Ley de potencia)",
+    "total_perturbaciones": 200
+  },
+  {
+    "fecha": "2026-10-21T15:33:36.205978",
+    "parametros": {
+      "n_filas": 16,
+      "n_cols": 16,
+      "n_agentes": 4,
+      "gamma_som": 0.2,
+      "gamma_ef": 0.9,
+      "sigma": 0.2,
+      "magnitud": 1,
+      "n_perturbaciones": 200,
+      "n_ciclos_equilibrio": 500,
+      "n_pasos_propagacion": 50
+    },
+    "alpha": 7.663,
+    "diagnostico": "🔵 SUB-CRÍTICO (Rígido)",
+    "total_perturbaciones": 200
+  },
+  {
+    "fecha": "2026-10-21T15:38:29.608127",
+    "parametros": {
+      "n_filas": 16,
+      "n_cols": 16,
+      "n_agentes": 4,
+      "gamma_som": 0.2,
+      "gamma_ef": 0.2,
+      "sigma": 0.2,
+      "magnitud": 1,
+      "n_perturbaciones": 200,
+      "n_ciclos_equilibrio": 500,
+      "n_pasos_propagacion": 50
+    },
+    "alpha": 1.21,
+    "diagnostico": "🟢 CRÍTICO (Ley de potencia)",
+    "total_perturbaciones": 200
+  },
+  {
+    "fecha": "2026-10-21T15:40:04.590228",
+    "parametros": {
+      "n_filas": 16,
+      "n_cols": 16,
+      "n_agentes": 4,
+      "gamma_som": 0.2,
+      "gamma_ef": 0.1,
+      "sigma": 0.2,
+      "magnitud": 1,
+      "n_perturbaciones": 200,
+      "n_ciclos_equilibrio": 500,
+      "n_pasos_propagacion": 50
+    },
+    "alpha": 1.21,
+    "diagnostico": "🟢 CRÍTICO (Ley de potencia)",
+    "total_perturbaciones": 200
+  },
+  {
+    "fecha": "2026-10-21T15:41:21.088200",
+    "parametros": {
+      "n_filas": 16,
+      "n_cols": 16,
+      "n_agentes": 4,
+      "gamma_som": 0.2,
+      "gamma_ef": 0.3,
+      "sigma": 0.2,
+      "magnitud": 1,
+      "n_perturbaciones": 200,
+      "n_ciclos_equilibrio": 500,
+      "n_pasos_propagacion": 50
+    },
+    "alpha": 1.21,
+    "diagnostico": "🟢 CRÍTICO (Ley de potencia)",
+    "total_perturbaciones": 200
+  },
+  {
+    "fecha": "2026-10-21T17:50:24.280017",
+    "parametros": {
+      "n_filas": 16,
+      "n_cols": 16,
+      "n_agentes": 4,
+      "gamma_som": 0.2,
+      "gamma_ef": 0.5,
+      "sigma": 0.2,
+      "magnitud": 1,
+      "n_perturbaciones": 200
+    },
+    "alpha": 1.239,
+    "diagnostico": "🟢 CRÍTICO (Ley de potencia)",
+    "total_perturbaciones": 200
+  },
+  {
+    "fecha": "2026-10-21T17:54:30.442004",
+    "parametros": {
+      "n_filas": 16,
+      "n_cols": 16,
+      "n_agentes": 4,
+      "gamma_som": 0.2,
+      "gamma_ef": 0.5,
+      "sigma": 0.2,
+      "magnitud": 1,
+      "n_perturbaciones": 200
+    },
+    "alpha": 1.239,
+    "diagnostico": "🟢 CRÍTICO (Ley de potencia)",
+    "total_perturbaciones": 200
+  },
+  {
+    "fecha": "2026-10-21T18:02:30.551421",
+    "parametros": {
+      "n_filas": 16,
+      "n_cols": 16,
+      "n_agentes": 4,
+      "gamma_som": 0.2,
+      "gamma_ef": 0.5,
+      "sigma": 0.2,
+      "magnitud": 1,
+      "n_perturbaciones": 200
+    },
+    "alpha": 1.239,
+    "diagnostico": "🟢 CRÍTICO (Ley de potencia)",
+    "total_perturbaciones": 200
+  },
+  {
+    "fecha": "2026-10-21T18:08:51.473721",
+    "parametros": {
+      "n_filas": 16,
+      "n_cols": 16,
+      "n_agentes": 4,
+      "gamma_som": 0.2,
+      "gamma_ef": 0.5,
+      "sigma": 0.2,
+      "magnitud": 1,
+      "n_perturbaciones": 200
+    },
+    "alpha": 1.239,
+    "diagnostico": "🟢 CRÍTICO (Ley de potencia)",
+    "total_perturbaciones": 200
+  },
+  {
+    "fecha": "2026-10-21T18:31:38.362913",
+    "parametros": {
+      "n_filas": 16,
+      "n_cols": 16,
+      "n_agentes": 4,
+      "gamma_som": 0.2,
+      "gamma_ef": 0.5,
+      "sigma": 0.2,
+      "magnitud": 1,
+      "n_perturbaciones": 200
+    },
+    "alpha": 1.239,
+    "diagnostico": "🟢 CRÍTICO (Ley de potencia)",
+    "total_perturbaciones": 200
+  },
+  {
+    "fecha": "2026-10-21T18:39:39.728959",
+    "parametros": {
+      "n_filas": 16,
+      "n_cols": 16,
+      "n_agentes": 4,
+      "gamma_som": 0.2,
+      "gamma_ef": 0.5,
+      "sigma": 0.2,
+      "magnitud": 1,
+      "n_perturbaciones": 200
+    },
+    "alpha": 1.239,
+    "diagnostico": "🟢 CRÍTICO (Ley de potencia)",
+    "total_perturbaciones": 200
+  },
+  {
+    "fecha": "2026-10-21T18:48:18.912904",
+    "parametros": {
+      "n_filas": 16,
+      "n_cols": 16,
+      "n_agentes": 4,
+      "gamma_som": 0.2,
+      "gamma_ef": 0.5,
+      "sigma": 0.2,
+      "magnitud": 1,
+      "n_perturbaciones": 200
+    },
+    "alpha": 1.239,
+    "diagnostico": "🟢 CRÍTICO (Ley de potencia)",
+    "total_perturbaciones": 200
+  }
+]

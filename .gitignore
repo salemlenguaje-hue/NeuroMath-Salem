@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Flask / Entorno
+instance/
+.webassets-cache
+
+# Archivos temporales y de sistema
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Datos locales sensibles (si llegara a haber)
+*.db
+.env
+.secreto

@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroMath Salem — Laboratorio</title>
+  <style>
+/* Canvas responsive para Ising */
+#canvas-M {
+  width: 100% !important;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Canvas responsive para Kuramoto */
+#canvas-r, #canvas-fases, #canvas-barrido {
+  width: 100% !important;
+  max-width: 100%;
+  height: auto;
+  min-height: 200px;
+}
+#canvas-barrido {
+  min-height: 300px;
+}
+
+</style>
+<link rel="stylesheet" href="/static/style.css">
+
+  <style>
+    @media print {
+      /* Fondo blanco, texto negro */
+      body {
+        background: white !important;
+        color: black !important;
+        font-size: 12pt;
+      }
+      
+      /* Ocultar elementos no necesarios */
+      .pestanas, .boton-ejecutar, .boton-copiar, .boton-secundario, .boton-chico,
+      #cargador, header .subtitulo {
+        display: none !important;
+      }
+      
+      /* Mostrar solo la pestaña activa */
+      .contenido-pestaña {
+        display: block !important;
+      }
+      .contenido-pestaña[hidden] {
+        display: none !important;
+      }
+      
+      /* Ajustar tarjetas para papel */
+      .tarjeta {
+        background: white !important;
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        margin-bottom: 15px;
+        page-break-inside: avoid;
+      }
+      
+      /* Ajustar canvas para impresión */
+      canvas {
+        max-width: 100% !important;
+        height: auto !important;
+        border: 1px solid #ddd;
+        page-break-inside: avoid;
+      }
+      
+      /* Ajustar colores de resultados */
+      .caja-alpha, .caja-diagnostico {
+        background: #f5f5f5 !important;
+        border: 1px solid #ddd !important;
+      }
+      
+      .valor-alpha {
+        color: #1a56db !important;
+      }
+      
+      /* Ocultar scrollbar */
+      .pestanas::-webkit-scrollbar {
+        display: none;
+      }
+    }
+  </style>
+
+</head>
+<body>
+  <header class="encabezado">
+    <div class="logo"> NeuroMath Salem</div>
+    <div class="subtitulo">Laboratorio de Modelos Matemáticos utiles a Neurociencia </div>
+  </header>
+
+  <nav class="pestanas">
+    <button class="pestaña activa" onclick="cambiarPestana('criticalidad')">🌊 Criticalidad</button>
+    <button class="pestaña" onclick="cambiarPestana('emocional')">❤️ Emocional y Valencia</button>
+    <button class="pestaña" onclick="cambiarPestana('kuramoto')">🌊 Kuramoto</button>
+    <button class="pestaña" onclick="cambiarPestana('ising')">🧲 Ising</button>
+    <button class="pestaña" onclick="cambiarPestana('entropia')">📊 Entropía</button>
+    <button class="pestaña" onclick="cambiarPestana('inferencia')">🧠 Inferencia Activa</button>
+    <button class="pestaña" onclick="cambiarPestana('bayes')">🎯 Bayes</button>
+    <button class="pestaña" onclick="cambiarPestana('historial')">📜 Simulaciones</button>
+  </nav>
+
+  <main class="contenedor">
+    
+    <!-- PESTAÑA 1: CRITICALIDAD -->
+    <div id="tab-criticalidad" class="contenido-pestaña">
+      <section class="tarjeta">
+        <h2>️ Parámetros del Grid (ADR-017)</h2>
+        <form id="formulario-criticalidad">
+          <div class="fila-parametros">
+            <div class="grupo"><label>Filas</label><input type="number" id="c_n_filas" value="16" min="4" max="32"></div>
+            <div class="grupo"><label>Columnas</label><input type="number" id="c_n_cols" value="16" min="4" max="32"></div>
+            <div class="grupo"><label>Agentes</label><input type="number" id="c_n_agentes" value="4" min="1" max="16"></div>
+          </div>
+          <div class="fila-parametros">
+            <div class="grupo"><label>γ_som</label><input type="number" id="c_gamma_som" step="0.1" value="0.2" min="0" max="1"></div>
+            <div class="grupo"><label>γ_ef</label><input type="number" id="c_gamma_ef" step="0.1" value="0.5" min="0" max="2"></div>
+            <div class="grupo"><label>σ (ruido)</label><input type="number" id="c_sigma" step="0.1" value="0.2" min="0" max="1"></div>
+          </div>
+          <div class="fila-parametros">
+            <div class="grupo"><label>Magnitud</label><input type="number" id="c_magnitud" step="0.1" value="1.0" min="0.1" max="5"></div>
+            <div class="grupo"><label>Perturbaciones</label><input type="number" id="c_n_pert" value="200" min="50" max="1000"></div>
+          </div>
+          <button type="submit" class="boton-ejecutar" id="btn-criticalidad">▶️ Ejecutar Criticalidad</button>
+        </form>
+      </section>
+
+      <section class="tarjeta" id="sec-criticalidad-resultados" hidden>
+        <h2> Resultados de Criticalidad</h2>
+        <div class="resultado-principal">
+          <div class="caja-alpha"><div class="etiqueta">Exponente α (MLE)</div><div class="valor-alpha" id="c_valor_alpha">--</div></div>
+          <div class="caja-diagnostico"><div class="etiqueta">Diagnóstico</div><div class="valor-diagnostico" id="c_valor_diag">--</div></div>
+        </div>
+        <button class="boton-secundario" onclick="window.print()" style="margin-right: 10px;">🖨️ Imprimir</button>
+        <button class="boton-copiar" onclick="copiarCriticalidad()"> Copiar reporte</button>
+        <div id="msg-copiado-c" class="mensaje-exito" hidden>✅ Copiado</div>
+      </section>
+    </div>
+
+    <!-- PESTAÑA 2: EMOCIONAL -->
+    <div id="tab-emocional" class="contenido-pestaña" hidden>
+      <section class="tarjeta">
+        <h2>❤️ Dinámica Emocional y Valencia (ADR-016)</h2>
+        <p class="ayuda">Ingresá el estado fisiológico observable S [0, 1] y la LUZ efectiva para calcular C_v y ΔSf.</p>
+        <form id="formulario-emocional">
+          <h3>Estado Fisiológico Observable (S)</h3>
+          <div class="fila-parametros">
+            <div class="grupo">
+              <label>Simpático [0-1]</label>
+              <input type="range" id="e_simp" min="0" max="1" step="0.1" value="0.5" oninput="document.getElementById('val-simp').textContent=this.value">
+              <span id="val-simp">0.5</span>
+            </div>
+            <div class="grupo">
+              <label>Parasimpático [0-1]</label>
+              <input type="range" id="e_para" min="0" max="1" step="0.1" value="0.5" oninput="document.getElementById('val-para').textContent=this.value">
+              <span id="val-para">0.5</span>
+            </div>
+            <div class="grupo">
+              <label>Cortisol [0-1]</label>
+              <input type="range" id="e_cort" min="0" max="1" step="0.1" value="0.5" oninput="document.getElementById('val-cort').textContent=this.value">
+              <span id="val-cort">0.5</span>
+            </div>
+          </div>
+          
+          <h3>Parámetros de Simulación</h3>
+          <div class="fila-parametros">
+            <div class="grupo"><label>LUZ efectiva</label><input type="number" id="e_luz" step="0.1" value="1.0" min="0" max="5"></div>
+            <div class="grupo">
+              <label>Ciclos (máx. 10M)</label>
+              <input type="number" id="e_ciclos" value="10000" min="1" max="10000000">
+            </div>
+            <div class="grupo"><label>τ_e (const. tiempo)</label><input type="number" id="e_tau" step="0.1" value="2.0" min="0.1" max="10"></div>
+          </div>
+          
+          <div class="fila-parametros">
+            <div class="grupo">
+              <label>Intervalo checkpoint</label>
+              <input type="number" id="e_intervalo" value="1000" min="1" max="1000000">
+              <small class="ayuda">Cada cuántos ciclos guardar snapshot</small>
+            </div>
+          </div>
+          
+          <button type="submit" class="boton-ejecutar" id="btn-emocional">▶️ Calcular Evolución Emocional</button>
+        </form>
+      </section>
+
+      <section class="tarjeta" id="sec-emocional-resultados" hidden>
+        <h2>📊 Resultado Emocional</h2>
+        <div class="resultado-principal">
+          <div class="caja-alpha"><div class="etiqueta">Coef. Valencia (C_v)</div><div class="valor-alpha" id="e_valor_cv" style="color: var(--acento);">--</div></div>
+          <div class="caja-diagnostico"><div class="etiqueta">ΔSf (Delta Evolución)</div><div class="valor-diagnostico" id="e_valor_sf" style="font-size: 1.5rem;">--</div></div>
+        </div>
+        
+        <div class="info-simulacion" id="info-simulacion" hidden>
+          <p><strong>Ciclos simulados:</strong> <span id="info-ciclos">--</span></p>
+          <p><strong>Checkpoints guardados:</strong> <span id="info-checkpoints">--</span></p>
+          <p><strong>Archivo:</strong> <span id="info-archivo">--</span></p>
+        </div>
+        
+        <h3>Nivel de Emociones (Ciclo Final)</h3>
+        <div id="barras-emociones" class="barras-emociones"></div>
+        
+        <button class="boton-secundario" onclick="window.print()" style="margin-right: 10px;">🖨️ Imprimir</button>
+        <button class="boton-copiar" onclick="copiarEmocional()">📋 Copiar reporte emocional</button>
+        <div id="msg-copiado-e" class="mensaje-exito" hidden>✅ Copiado</div>
+      </section>
+    </div>
+
+    
+    
+    
+    
+    
+    <!-- PESTAÑA KURAMOTO -->
+    <div id="tab-kuramoto" class="contenido-pestaña" hidden>
+      <section class="tarjeta">
+        <h2>🌊 Modelo de Kuramoto (Sincronización)</h2>
+        <p class="ayuda">Simula N osciladores de fase con acoplamiento sinusoidal. Al aumentar K, el sistema pasa del caos a la sincronía.</p>
+        
+        <h3>Parámetros</h3>
+        <div class="fila-parametros">
+          <div class="grupo"><label>N° de osciladores</label><input type="number" id="ku_n" value="50" min="10" max="200"></div>
+          <div class="grupo"><label>Acoplamiento K</label><input type="number" id="ku_K" step="0.1" value="1.0" min="0" max="5"></div>
+          <div class="grupo"><label>Tiempo total</label><input type="number" id="ku_tiempo" step="1" value="10" min="1" max="50"></div>
+        </div>
+
+        <div class="fila-parametros">
+          <div class="grupo">
+            <label>Distribución de frecuencias</label>
+            <select id="ku_dist">
+              <option value="lorentz">Lorentz (Cauchy)</option>
+              <option value="uniforme">Uniforme</option>
+            </select>
+          </div>
+          <div class="grupo"><label>Ancho de distribución</label><input type="number" id="ku_ancho" step="0.1" value="1.0" min="0.1" max="5"></div>
+          <div class="grupo"><label>Semilla</label><input type="number" id="ku_semilla" value="42" min="1"></div>
+        </div>
+
+        <div class="presets-kuramoto" style="margin: 15px 0;">
+          <button class="boton-chico" onclick="presetKuramoto(0.5)">K=0.5 (Caos)</button>
+          <button class="boton-chico" onclick="presetKuramoto(2.0)">K=2.0 (Crítico)</button>
+          <button class="boton-chico" onclick="presetKuramoto(4.0)">K=4.0 (Orden)</button>
+        </div>
+
+        <button type="button" class="boton-ejecutar" id="btn-kuramoto" onclick="simularKuramoto()">▶️ Ejecutar Simulación</button>
+        
+        <button type="button" class="boton-secundario" onclick="barridoKuramoto()" style="margin-top: 10px;">
+          📈 Barrido de K (ver transición de fase)
+        </button>
+      </section>
+
+      <section class="tarjeta" id="sec-kuramoto-resultados" hidden>
+        <h2>📊 Resultados</h2>
+        
+        <div class="resultado-principal">
+          <div class="caja-alpha">
+            <div class="etiqueta">Parámetro de Orden r</div>
+            <div class="valor-alpha" id="ku_r_final">--</div>
+          </div>
+          <div class="caja-diagnostico">
+            <div class="etiqueta">Estado del Sistema</div>
+            <div class="valor-diagnostico" id="ku_estado">--</div>
+          </div>
+        </div>
+
+        <div class="info-simulacion">
+          <p><strong>Fase media ψ:</strong> <span id="ku_psi">--</span> rad</p>
+          <p><strong>K_c teórico (Lorentz):</strong> <span id="ku_Kc">--</span></p>
+        </div>
+
+        <h3>Evolución del Parámetro de Orden r(t)</h3>
+        <div class="contenedor-canvas">
+          <canvas id="canvas-r" width="600" height="200"></canvas>
+        </div>
+
+        <h3>Distribución de Fases Finales</h3>
+        <div class="contenedor-canvas">
+          <canvas id="canvas-fases" width="600" height="200"></canvas>
+        </div>
+
+        <div id="sec-barrido" hidden>
+          <h3>Barrido de K: Transición de Fase</h3>
+          <div class="contenedor-canvas">
+            <canvas id="canvas-barrido" width="600" height="300"></canvas>
+          </div>
+        </div>
+
+        <button class="boton-secundario" onclick="window.print()" style="margin-right: 10px;">🖨️ Imprimir</button>
+         <button class="boton-copiar" onclick="copiarKuramoto()" style="margin-top: 15px;">📋 Copiar reporte</button>
+        <div id="msg-copiado-ku" class="mensaje-exito" hidden>✅ Copiado</div>
+      </section>
+    </div>
+
+    <!-- PESTAÑA ISING -->
+    <div id="tab-ising" class="contenido-pestaña" hidden>
+      <section class="tarjeta">
+        <h2>🧲 Modelo de Ising (Ferromagnetismo)</h2>
+        <p class="ayuda">Simula una red de espines (+1/-1) que interactúan con sus vecinos. Al bajar la temperatura, el sistema pasa del desorden al orden espontáneo.</p>
+        
+        <h3>Parámetros del Grid</h3>
+        <div class="fila-parametros">
+          <div class="grupo"><label>Filas</label><input type="number" id="is_n_filas" value="20" min="10" max="50"></div>
+          <div class="grupo"><label>Columnas</label><input type="number" id="is_n_cols" value="20" min="10" max="50"></div>
+          <div class="grupo"><label>Semilla</label><input type="number" id="is_semilla" value="42" min="1"></div>
+        </div>
+
+        <h3>Parámetros Físicos</h3>
+        <div class="fila-parametros">
+          <div class="grupo"><label>Temperatura T</label><input type="number" id="is_T" step="0.1" value="2.0" min="0.1" max="10"></div>
+          <div class="grupo"><label>Acoplamiento J</label><input type="number" id="is_J" step="0.1" value="1.0" min="0.1" max="5"></div>
+          <div class="grupo"><label>Campo h</label><input type="number" id="is_h" step="0.1" value="0.0" min="-2" max="2"></div>
+        </div>
+
+        <h3>Simulación</h3>
+        <div class="fila-parametros">
+          <div class="grupo"><label>Pasos de equilibrio</label><input type="number" id="is_eq" value="200" min="50" max="2000"></div>
+          <div class="grupo"><label>Pasos de medición</label><input type="number" id="is_pasos" value="500" min="100" max="5000"></div>
+        </div>
+
+        <div class="presets-ising" style="margin: 15px 0;">
+          <button class="boton-chico" onclick="presetIsing(1.0)">T=1.0 (Frío)</button>
+          <button class="boton-chico" onclick="presetIsing(2.269)">T≈T_c (Crítico)</button>
+          <button class="boton-chico" onclick="presetIsing(4.0)">T=4.0 (Caliente)</button>
+        </div>
+
+        <button type="button" class="boton-ejecutar" id="btn-ising" onclick="simularIsing()">▶️ Ejecutar Simulación</button>
+      </section>
+
+      <section class="tarjeta" id="sec-ising-resultados" hidden>
+        <h2>📊 Resultados</h2>
+        
+        <div class="resultado-principal">
+          <div class="caja-alpha">
+            <div class="etiqueta">Magnetización M</div>
+            <div class="valor-alpha" id="is_M_final">--</div>
+          </div>
+          <div class="caja-diagnostico">
+            <div class="etiqueta">Fase del Sistema</div>
+            <div class="valor-diagnostico" id="is_fase">--</div>
+          </div>
+        </div>
+
+        <div class="info-simulacion">
+          <p><strong>Energía final E:</strong> <span id="is_E_final">--</span></p>
+          <p><strong>|M| promedio:</strong> <span id="is_M_abs">--</span></p>
+          <p><strong>T_c teórica (grid infinito):</strong> <span id="is_Tc">--</span></p>
+        </div>
+
+        <h3>Mapa de Espines (estado final)</h3>
+        <p class="ayuda">Azul = espín -1, Rojo = espín +1</p>
+        <div class="contenedor-canvas">
+          <canvas id="canvas-ising"></canvas>
+        </div>
+
+        <h3>Evolución de la Magnetización</h3>
+        <div class="contenedor-canvas">
+          <canvas id="canvas-M" width="600" height="200"></canvas>
+        </div>
+
+
+        <button class="boton-secundario" onclick="window.print()" style="margin-top: 10px;">
+          🖨️ Imprimir resultados
+        </button>
+        <button class="boton-copiar" onclick="copiarIsing()" style="margin-top: 15px;">📋 Copiar reporte</button>
+        <div id="msg-copiado-is" class="mensaje-exito" hidden>✅ Copiado</div>
+      </section>
+    </div>
+
+    <!-- PESTAÑA ENTROPÍA -->
+    <div id="tab-entropia" class="contenido-pestaña" hidden>
+      <section class="tarjeta">
+        <h2>📊 Entropía de Shannon e Información Mutua</h2>
+        <p class="ayuda">Calcula la entropía de distribuciones de probabilidad y la información mutua entre variables.</p>
+        
+        <div class="grupo" style="margin-bottom: 15px;">
+          <label>Tipo de cálculo</label>
+          <select id="ent_tipo" onchange="cambiarTipoEntropia()">
+            <option value="entropia">Entropía de Shannon H(X)</option>
+            <option value="mutua">Información Mutua I(X;Y)</option>
+          </select>
+        </div>
+
+        <div class="grupo" style="margin-bottom: 15px;">
+          <label>Base del logaritmo</label>
+          <select id="ent_base">
+            <option value="2">2 (bits)</option>
+            <option value="e">e (nats)</option>
+            <option value="10">10 (dits/hartleys)</option>
+          </select>
+        </div>
+
+        <!-- Sección Entropía Simple -->
+        <div id="ent-seccion-simple">
+          <h3>Distribución de Probabilidad</h3>
+          <p class="ayuda">Ingresá las probabilidades separadas por comas (deben sumar 1)</p>
+          <div class="grupo">
+            <input type="text" id="ent_distribucion" placeholder="0.5, 0.3, 0.2" value="0.5, 0.3, 0.2">
+          </div>
+        </div>
+
+        <!-- Sección Información Mutua -->
+        <div id="ent-seccion-mutua" hidden>
+          <h3>Matriz de Distribución Conjunta P(X,Y)</h3>
+          <p class="ayuda">Ingresá la matriz fila por fila, separando valores con comas y filas con punto y coma</p>
+          <div class="grupo">
+            <textarea id="ent_matriz" rows="4" placeholder="0.5, 0.05; 0.15, 0.1; 0.05, 0.15">0.5, 0.05; 0.15, 0.1; 0.05, 0.15</textarea>
+          </div>
+          <button class="boton-secundario" onclick="cargarEjemploEntropia()" style="margin-top: 10px;"> Cargar ejemplo clima-paraguas</button>
+        </div>
+
+        <button type="button" class="boton-ejecutar" id="btn-ent" onclick="calcularEntropia()" style="margin-top: 20px;">▶️ Calcular</button>
+      </section>
+
+      <section class="tarjeta" id="sec-ent-resultados" hidden>
+        <h2>📊 Resultados</h2>
+        <div id="ent-contenido-resultados"></div>
+        
+
+        <button class="boton-secundario" onclick="window.print()" style="margin-top: 10px;">
+          🖨️ Imprimir resultados
+        </button>
+        <button class="boton-copiar" onclick="copiarEntropia()" style="margin-top: 15px;">📋 Copiar reporte</button>
+        <div id="msg-copiado-ent" class="mensaje-exito" hidden>✅ Copiado</div>
+      </section>
+    </div>
+
+    <!-- PESTAÑA INFERENCIA ACTIVA -->
+    <div id="tab-inferencia" class="contenido-pestaña" hidden>
+      <section class="tarjeta">
+        <h2>🧠 Simulador de Inferencia Activa (Friston)</h2>
+        <p class="ayuda">El agente minimiza la Energía Libre Variacional (VFE) para percibir, y la Energía Libre Esperada (EFE) para actuar.</p>
+        
+        <div class="grupo" style="margin-bottom: 15px;">
+          <label>Escenario Predefinido</label>
+          <select id="ia_escenario" onchange="cargarEscenarioIA()">
+            <option value="clasico">Equilibrio Clásico</option>
+            <option value="ruidoso">Entorno Ruidoso</option>
+            <option value="obsesivo">Preferencia Extrema</option>
+          </select>
+          <small class="ayuda" id="ia_desc_escenario">El agente prefiere obs=1. La acción 0 mantiene el estado, la acción 1 lo cambia.</small>
+        </div>
+
+        <details style="margin-bottom: 15px; color: var(--texto-suave);">
+          <summary style="cursor: pointer; font-weight: 600;">⚙️ Ver/Editar Matrices (Avanzado)</summary>
+          <div class="fila-parametros" style="margin-top: 10px;">
+            <div class="grupo"><label>Preferencias C [obs 0, obs 1]</label><input type="text" id="ia_C" value="0.1, 0.9"></div>
+            <div class="grupo"><label>Creencias Iniciales D [est 0, est 1]</label><input type="text" id="ia_D" value="0.5, 0.5"></div>
+          </div>
+        </details>
+
+        <div class="fila-parametros">
+          <div class="grupo"><label>Pasos de simulación</label><input type="number" id="ia_pasos" value="5" min="1" max="20"></div>
+          <div class="grupo"><label>Estado Verdadero Inicial</label>
+            <select id="ia_estado_inicial"><option value="0">Estado 0</option><option value="1">Estado 1</option></select>
+          </div>
+        </div>
+
+        <button type="button" class="boton-ejecutar" id="btn-ia" onclick="simularIA()">▶️ Ejecutar Simulación</button>
+      </section>
+
+      <section class="tarjeta" id="sec-ia-resultados" hidden>
+        <h2>📊 Trayectoria del Agente</h2>
+        <p class="ayuda">Escenario: <strong id="ia_nombre_escenario">--</strong></p>
+        
+        <div id="ia-historial" class="ia-historial">
+          <!-- Se llena dinámicamente con cada paso -->
+        </div>
+        
+
+        <button class="boton-secundario" onclick="window.print()" style="margin-top: 10px;">
+          🖨️ Imprimir resultados
+        </button>
+         <button class="boton-copiar" onclick="copiarIA()" style="margin-top: 15px;">📋 Copiar reporte de inferencia</button>
+        <div id="msg-copiado-ia" class="mensaje-exito" hidden>✅ Copiado</div>
+      </section>
+    </div>
+
+    <!-- PESTAÑA BAYES -->
+    <div id="tab-bayes" class="contenido-pestaña" hidden>
+      <section class="tarjeta">
+        <h2> Actualizador Bayesiano (Teorema de Bayes)</h2>
+        <p class="ayuda">Calcula cómo se actualizan las probabilidades ante nueva evidencia. Ingresá las hipótesis, sus probabilidades a priori y las verosimilitudes.</p>
+        
+        <button class="boton-secundario" onclick="cargarEjemploBayes()">📋 Cargar ejemplo clínico</button>
+        
+        <form id="formulario-bayes">
+          <h3>Hipótesis y Probabilidades</h3>
+          <div id="lista-hipotesis" class="lista-hipotesis">
+            <!-- Se generan dinámicamente -->
+          </div>
+          <button type="button" class="boton-chico" onclick="agregarHipotesis()">➕ Agregar hipótesis</button>
+          
+          <h3 style="margin-top: 20px;">Evidencia Observada</h3>
+          <div class="grupo">
+            <label>Descripción de la evidencia (opcional, para el reporte)</label>
+            <input type="text" id="bayes_evidencia" placeholder="Ej: Paciente presenta síntoma X">
+          </div>
+          
+          <button type="submit" class="boton-ejecutar" id="btn-bayes" style="margin-top: 20px;">▶️ Calcular Actualización Bayesiana</button>
+        </form>
+      </section>
+
+      <section class="tarjeta" id="sec-bayes-resultados" hidden>
+        <h2>📊 Resultado de la Actualización</h2>
+        
+        <div class="resultado-principal">
+          <div class="caja-alpha">
+            <div class="etiqueta">Hipótesis Más Probable</div>
+            <div class="valor-alpha" id="bayes_mejor_hip" style="font-size: 1.5rem;">--</div>
+          </div>
+          <div class="caja-diagnostico">
+            <div class="etiqueta">Probabilidad Máxima</div>
+            <div class="valor-diagnostico" id="bayes_prob_max" style="font-size: 1.5rem;">--</div>
+          </div>
+        </div>
+
+        <h3>Probabilidades Posteriores</h3>
+        <div id="barras-bayes" class="barras-emociones"></div>
+        
+        <h3>Detalle del Cálculo</h3>
+        <div id="detalle-bayes" class="detalle-bayes"></div>
+        
+
+        <button class="boton-secundario" onclick="window.print()" style="margin-top: 10px;">
+          🖨️ Imprimir resultados
+        </button>
+        <button class="boton-copiar" onclick="copiarBayes()">📋 Copiar reporte bayesiano</button>
+        <div id="msg-copiado-b" class="mensaje-exito" hidden>✅ Copiado</div>
+      </section>
+    </div>
+
+    <!-- PESTAÑA 3: HISTORIAL DE SIMULACIONES -->
+    <div id="tab-historial" class="contenido-pestaña" hidden>
+      <section class="tarjeta">
+        <h2>📜 Simulaciones Guardadas</h2>
+        <button class="boton-secundario" onclick="cargarSimulaciones()">🔄 Actualizar lista</button>
+        <div id="lista-simulaciones" class="lista-simulaciones">
+          <p class="ayuda">Cargando...</p>
+        </div>
+      </section>
+
+      <section class="tarjeta" id="sec-detalle-simulacion" hidden>
+        <h2>📈 Detalle de Simulación: <span id="titulo-simulacion">--</span></h2>
+        <div id="contenido-detalle" class="contenido-detalle"></div>
+        <button class="boton-secundario" onclick="document.getElementById('sec-detalle-simulacion').hidden = true">Cerrar</button>
+      </section>
+    </div>
+
+  </main>
+
+  <div class="cargador" id="cargador" hidden>
+    <div class="spinner"></div>
+    <p id="texto-cargador">Procesando modelo matemático...</p>
+  </div>
+
+  <script>
+    let ultimoResCriticalidad = null;
+    let simulacionActual = null;
+    let ultimoResEmocional = null;
+
+    function cambiarPestana(tab) {
+      document.querySelectorAll('.contenido-pestaña').forEach(el => el.hidden = true);
+      document.querySelectorAll('.pestaña').forEach(el => el.classList.remove('activa'));
+      document.getElementById('tab-' + tab).hidden = false;
+      event.target.classList.add('activa');
+      if (tab === 'historial') cargarSimulaciones();
+    }
+
+    // --- CRITICALIDAD ---
+    document.getElementById('formulario-criticalidad').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const cargador = document.getElementById('cargador');
+      const btn = document.getElementById('btn-criticalidad');
+      btn.disabled = true; cargador.hidden = false;
+
+      const datos = {
+        n_filas: parseInt(document.getElementById('c_n_filas').value),
+        n_cols: parseInt(document.getElementById('c_n_cols').value),
+        n_agentes: parseInt(document.getElementById('c_n_agentes').value),
+        gamma_som: parseFloat(document.getElementById('c_gamma_som').value),
+        gamma_ef: parseFloat(document.getElementById('c_gamma_ef').value),
+        sigma: parseFloat(document.getElementById('c_sigma').value),
+        magnitud: parseFloat(document.getElementById('c_magnitud').value),
+        n_perturbaciones: parseInt(document.getElementById('c_n_pert').value)
+      };
+
+      try {
+        const resp = await fetch('/api/ejecutar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(datos) });
+        const res = await resp.json();
+        if (res.ok) {
+          ultimoResCriticalidad = { datos, res };
+          document.getElementById('c_valor_alpha').textContent = res.alpha;
+          document.getElementById('c_valor_diag').textContent = res.diagnostico;
+          document.getElementById('sec-criticalidad-resultados').hidden = false;
+        }
+      } catch (err) { alert('Error: ' + err); }
+      finally { btn.disabled = false; cargador.hidden = true; }
+    });
+
+    function copiarCriticalidad() {
+      if (!ultimoResCriticalidad) return;
+      const { datos: p, res: r } = ultimoResCriticalidad;
+      let txt = `# Experimento Criticalidad
+- Grid: ${p.n_filas}x${p.n_cols}, Agentes: ${p.n_agentes}
+- γ_som: ${p.gamma_som}, γ_ef: ${p.gamma_ef}, σ: ${p.sigma}
+- α estimado: ${r.alpha}
+- Diagnóstico: ${r.diagnostico}`;
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(() => {
+          const msg = document.getElementById('msg-copiado-c');
+          msg.hidden = false; setTimeout(() => msg.hidden = true, 2000);
+        }).catch(() => copiarConTextareaC(txt));
+      } else {
+        copiarConTextareaC(txt);
+      }
+    }
+    
+    function copiarConTextareaC(texto) {
+      const textarea = document.createElement('textarea');
+      textarea.value = texto;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        const msg = document.getElementById('msg-copiado-c');
+        msg.hidden = false; setTimeout(() => msg.hidden = true, 2000);
+      } catch (err) {
+        alert('No se pudo copiar automáticamente.');
+      }
+      document.body.removeChild(textarea);
+    }
+
+    // --- EMOCIONAL ---
+    document.getElementById('formulario-emocional').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const cargador = document.getElementById('cargador');
+      const btn = document.getElementById('btn-emocional');
+      btn.disabled = true; 
+      document.getElementById('texto-cargador').textContent = 'Simulando evolución emocional...';
+      cargador.hidden = false;
+
+      const datos = {
+        simp: parseFloat(document.getElementById('e_simp').value),
+        para: parseFloat(document.getElementById('e_para').value),
+        cort: parseFloat(document.getElementById('e_cort').value),
+        luz_efectiva: parseFloat(document.getElementById('e_luz').value),
+        ciclos: parseInt(document.getElementById('e_ciclos').value),
+        tau_e: parseFloat(document.getElementById('e_tau').value),
+        sigma_e: 0.3,
+        intervalo_checkpoint: parseInt(document.getElementById('e_intervalo').value)
+      };
+
+      try {
+        const resp = await fetch('/api/emocional/ejecutar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(datos) });
+        const res = await resp.json();
+        if (res.ok) {
+          ultimoResEmocional = { datos, res };
+          document.getElementById('e_valor_cv').textContent = res.C_v;
+          document.getElementById('e_valor_sf').textContent = (res.delta_sf > 0 ? '+' : '') + res.delta_sf;
+          document.getElementById('e_valor_sf').style.color = res.delta_sf >= 0 ? 'var(--success)' : 'var(--danger)';
+          
+          // Mostrar info de simulación
+          document.getElementById('info-ciclos').textContent = res.ciclos_simulados.toLocaleString();
+          document.getElementById('info-checkpoints').textContent = res.checkpoints_guardados.toLocaleString();
+          document.getElementById('info-archivo').textContent = res.ruta_archivo;
+          document.getElementById('info-simulacion').hidden = false;
+          
+          const contenedor = document.getElementById('barras-emociones');
+          contenedor.innerHTML = '';
+          res.emociones.forEach(emo => {
+            const pct = Math.min(100, emo.valor * 100);
+            const color = emo.alfa > 0 ? 'var(--success)' : 'var(--danger)';
+            contenedor.innerHTML += `
+              <div class="barra-emocion">
+                <div class="barra-nombre">${emo.nombre} (α=${emo.alfa})</div>
+                <div class="barra-fondo">
+                  <div class="barra-relleno" style="width: ${pct}%; background: ${color};"></div>
+                </div>
+                <div class="barra-valor">${emo.valor.toFixed(2)}</div>
+              </div>
+            `;
+          });
+          document.getElementById('sec-emocional-resultados').hidden = false;
+        } else {
+          alert('Error: ' + res.error);
+        }
+      } catch (err) { alert('Error: ' + err); }
+      finally { btn.disabled = false; cargador.hidden = true; }
+    });
+
+    function copiarEmocional() {
+      if (!ultimoResEmocional) return;
+      const { datos: p, res: r } = ultimoResEmocional;
+      let txt = `# Resultado Emocional (ADR-016)\n\n## Parámetros\n- **Estado S:** simp=${p.simp}, para=${p.para}, cort=${p.cort}\n- **LUZ efectiva:** ${p.luz_efectiva}\n- **Ciclos:** ${p.ciclos.toLocaleString()}\n- **Intervalo checkpoint:** ${p.intervalo_checkpoint}\n- **τ_e:** ${p.tau_e}\n\n## Resultados\n- **Coef. Valencia (C_v):** ${r.C_v}\n- **ΔSf:** ${r.delta_sf >= 0 ? '+' : ''}${r.delta_sf}\n- **Checkpoints guardados:** ${r.checkpoints_guardados.toLocaleString()}\n\n## Emociones Finales\n`;
+      r.emociones.forEach(e => { 
+        txt += `- **${e.nombre}** (α=${e.alfa}): ${e.valor.toFixed(2)}\n`; 
+      });
+      txt += `\n---\n*Generado por NeuroMath Salem — Laboratorio de Modelos Emocionales (ADR-016)*`;
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(() => {
+          const msg = document.getElementById('msg-copiado-e');
+          msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
+        }).catch(() => copiarConTextareaEmocional(txt));
+      } else {
+        copiarConTextareaEmocional(txt);
+      }
+    }
+    
+    function copiarConTextareaEmocional(texto) {
+      const textarea = document.createElement('textarea');
+      textarea.value = texto;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        const msg = document.getElementById('msg-copiado-e');
+        msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
+      } catch (err) {
+        alert('No se pudo copiar automáticamente.');
+      }
+      document.body.removeChild(textarea);
+    }
+
+    // --- HISTORIAL DE SIMULACIONES ---
+    async function cargarSimulaciones() {
+      const contenedor = document.getElementById('lista-simulaciones');
+      try {
+        const resp = await fetch('/api/emocional/simulaciones');
+        const simulaciones = await resp.json();
+        
+        if (simulaciones.length === 0) {
+          contenedor.innerHTML = '<p class="ayuda">Sin simulaciones guardadas.</p>';
+          return;
+        }
+        
+        contenedor.innerHTML = '';
+        simulaciones.reverse().forEach(sim => {
+          const div = document.createElement('div');
+          div.className = 'item-simulacion';
+          const fecha = new Date(sim.fecha).toLocaleString('es-AR');
+          div.innerHTML = `
+            <div class="simulacion-nombre">${sim.nombre}</div>
+            <div class="simulacion-fecha">${fecha}</div>
+            <div class="simulacion-datos">
+              Ciclos: ${sim.parametros.ciclos?.toLocaleString() || '?'} · 
+              Checkpoint cada: ${sim.parametros.intervalo_checkpoint?.toLocaleString() || '?'}
+            </div>
+            <button class="boton-chico" onclick="verDetalleSimulacion('${sim.nombre}')">Ver detalles</button>
+          `;
+          contenedor.appendChild(div);
+        });
+      } catch (error) {
+        contenedor.innerHTML = '<p class="error">Error al cargar simulaciones.</p>';
+      }
+    }
+
+    async function verDetalleSimulacion(nombre) {
+      const contenedor = document.getElementById('contenido-detalle');
+      const seccion = document.getElementById('sec-detalle-simulacion');
+      document.getElementById('titulo-simulacion').textContent = nombre;
+      contenedor.innerHTML = '<p class="ayuda">Cargando checkpoints...</p>';
+      seccion.hidden = false;
+      
+      try {
+        const resp = await fetch(`/api/emocional/checkpoints/${nombre}`);
+        const datos = await resp.json();
+        
+        if (!datos.ok) {
+          contenedor.innerHTML = `<p class="error">${datos.error}</p>`;
+          return;
+        }
+        
+        const checkpoints = datos.checkpoints;
+        simulacionActual = { nombre, checkpoints }; // Guardar para la función de copiar
+        if (checkpoints.length === 0) {
+          contenedor.innerHTML = '<p class="ayuda">Sin checkpoints en esta simulación.</p>';
+          return;
+        }
+        
+        // Mostrar primeros 10 y últimos 10 checkpoints
+        const mostrar = [...checkpoints.slice(0, 10)];
+        if (checkpoints.length > 20) {
+          mostrar.push({tipo: 'separador', ciclo: '...'});
+          mostrar.push(...checkpoints.slice(-10));
+        } else {
+          mostrar.push(...checkpoints.slice(10));
+        }
+        
+        let html = '<table class="tabla-checkpoints"><thead><tr><th>Ciclo</th><th>C_v</th><th>ΔSf</th><th>Emoción dominante</th></tr></thead><tbody>';
+        mostrar.forEach(cp => {
+          if (cp.tipo === 'separador') {
+            html += '<tr><td colspan="4" style="text-align:center;">...</td></tr>';
+          } else {
+            const emocion_dom = Object.entries(cp.emociones).sort((a,b) => b[1]-a[1])[0];
+            html += `<tr><td>${cp.ciclo.toLocaleString()}</td><td>${cp.C_v}</td><td>${cp.delta_sf >= 0 ? '+' : ''}${cp.delta_sf}</td><td>${emocion_dom[0]} (${emocion_dom[1].toFixed(2)})</td></tr>`;
+          }
+        });
+        html += '</tbody></table>';
+        
+        // Botón para copiar el reporte completo
+        html += `<button class="boton-secundario" onclick="window.print()" style="margin-right: 10px;">🖨️ Imprimir</button>
+         style="margin-top: 15px;" <button class="boton-copiar" onclick="copiarSimulacion()">📋 Copiar reporte de simulación</button>
+                 <div id="msg-copiado-s" class="mensaje-exito" hidden>✅ Copiado</div>`;
+        
+        contenedor.innerHTML = html;
+      } catch (error) {
+        contenedor.innerHTML = '<p class="error">Error al cargar detalles.</p>';
+      }
+    }
+  
+    function copiarSimulacion() {
+      if (!simulacionActual) return;
+      
+      let txt = `# Reporte de Simulación: ${simulacionActual.nombre}\n\n`;
+      txt += `## Resumen de Checkpoints (${simulacionActual.checkpoints.length} totales)\n\n`;
+      txt += `| Ciclo | C_v | ΔSf | Emoción Dominante |\n|---|---|---|---|\n`;
+      
+      simulacionActual.checkpoints.forEach(cp => {
+        const emocion_dom = Object.entries(cp.emociones).sort((a,b) => b[1]-a[1])[0];
+        txt += `| ${cp.ciclo.toLocaleString()} | ${cp.C_v} | ${cp.delta_sf >= 0 ? '+' : ''}${cp.delta_sf} | ${emocion_dom[0]} (${emocion_dom[1].toFixed(2)}) |\n`;
+      });
+      
+      txt += `\n---\n*Generado por NeuroMath Salem — Laboratorio de Modelos Emocionales (ADR-016)*`;
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(() => {
+          const msg = document.getElementById('msg-copiado-s');
+          msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
+        }).catch(() => copiarConTextareaSimulacion(txt));
+      } else {
+        copiarConTextareaSimulacion(txt);
+      }
+    }
+    
+    function copiarConTextareaSimulacion(texto) {
+      const textarea = document.createElement('textarea');
+      textarea.value = texto;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        const msg = document.getElementById('msg-copiado-s');
+        msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
+      } catch (err) {
+        alert('No se pudo copiar automáticamente.');
+      }
+      document.body.removeChild(textarea);
+    }
+
+  
+    // --- BAYES ---
+    let contadorHipotesis = 0;
+    let ultimoResBayes = null;
+
+    function agregarHipotesis(nombre='', previa=0.5, verosimilitud=0.5) {
+      contadorHipotesis++;
+      const contenedor = document.getElementById('lista-hipotesis');
+      const div = document.createElement('div');
+      div.className = 'item-hipotesis';
+      div.id = `hip-${contadorHipotesis}`;
+      div.innerHTML = `
+        <input type="text" placeholder="Nombre hipótesis" value="${nombre}" class="hip-nombre">
+        <input type="number" step="0.01" min="0" max="1" value="${previa}" class="hip-previa" title="Probabilidad a priori">
+        <input type="number" step="0.01" min="0" max="1" value="${verosimilitud}" class="hip-verosimilitud" title="Verosimilitud P(E|H)">
+        <button type="button" onclick="eliminarHipotesis(${contadorHipotesis})">🗑️</button>
+      `;
+      contenedor.appendChild(div);
+    }
+
+    function eliminarHipotesis(id) {
+      const elem = document.getElementById(`hip-${id}`);
+      if (elem) elem.remove();
+    }
+
+    function cargarEjemploBayes() {
+      // Limpiar lista actual
+      document.getElementById('lista-hipotesis').innerHTML = '';
+      contadorHipotesis = 0;
+      
+      // Cargar ejemplo clínico
+      agregarHipotesis('Enfermedad A', 0.01, 0.9);
+      agregarHipotesis('Enfermedad B', 0.005, 0.8);
+      agregarHipotesis('Sin enfermedad grave', 0.985, 0.1);
+      document.getElementById('bayes_evidencia').value = 'Paciente presenta síntoma X';
+    }
+
+    document.getElementById('formulario-bayes').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-bayes');
+      btn.disabled = true; btn.textContent = '⏳ Calculando...';
+
+      const items = document.querySelectorAll('.item-hipotesis');
+      const previas = [];
+      const verosimilitudes = [];
+      const nombres = [];
+
+      items.forEach(item => {
+        const nombre = item.querySelector('.hip-nombre').value || 'H';
+        const previa = parseFloat(item.querySelector('.hip-previa').value);
+        const verosimilitud = parseFloat(item.querySelector('.hip-verosimilitud').value);
+        nombres.push(nombre);
+        previas.push(previa);
+        verosimilitudes.push(verosimilitud);
+      });
+
+      const evidencia = document.getElementById('bayes_evidencia').value;
+
+      try {
+        const resp = await fetch('/api/bayes/actualizar', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            probabilidades_previas: previas,
+            verosimilitudes: verosimilitudes,
+            nombres_hipotesis: nombres,
+            evidencia: evidencia
+          })
+        });
+        const res = await resp.json();
+
+        if (res.ok) {
+          ultimoResBayes = { nombres, previas, verosimilitudes, evidencia, res: res.resultado };
+          
+          document.getElementById('bayes_mejor_hip').textContent = res.resultado.resumen.hipotesis_mas_probable;
+          document.getElementById('bayes_prob_max').textContent = (res.resultado.resumen.probabilidad_maxima * 100).toFixed(2) + '%';
+          
+          // Barras de posteriores
+          const contenedor = document.getElementById('barras-bayes');
+          contenedor.innerHTML = '';
+          res.resultado.probabilidades_posteriores.forEach((post, i) => {
+            const pct = post * 100;
+            const color = i === res.resultado.probabilidades_posteriores.indexOf(Math.max(...res.resultado.probabilidades_posteriores)) ? 'var(--success)' : 'var(--acento)';
+            contenedor.innerHTML += `
+              <div class="barra-emocion">
+                <div class="barra-nombre">${nombres[i] || 'H_' + (i+1)}</div>
+                <div class="barra-fondo">
+                  <div class="barra-relleno" style="width: ${pct}%; background: ${color};"></div>
+                </div>
+                <div class="barra-valor">${(pct).toFixed(2)}%</div>
+              </div>
+            `;
+          });
+          
+          // Detalle de cálculos
+          const detalle = document.getElementById('detalle-bayes');
+          detalle.innerHTML = '<div class="paso"><strong>Evidencia marginal P(E):</strong> ' + res.resultado.evidencia_marginal.toFixed(6) + '</div>';
+          res.resultado.pasos_intermedios.forEach((paso, i) => {
+            detalle.innerHTML += `
+              <div class="paso">
+                <strong>${nombres[i] || paso.hipotesis}:</strong><br>
+                <span class="formula">${paso.formula}</span><br>
+                <span class="formula">${paso.formula_posterior}</span><br>
+                Factor de actualización: ${res.resultado.factores_actualizacion[i].toFixed(2)}x
+              </div>
+            `;
+          });
+          
+          document.getElementById('sec-bayes-resultados').hidden = false;
+        } else {
+          alert('Error: ' + res.error);
+        }
+      } catch (err) {
+        alert('Error: ' + err);
+      } finally {
+        btn.disabled = false; btn.textContent = '▶️ Calcular Actualización Bayesiana';
+      }
+    });
+
+    function copiarBayes() {
+      if (!ultimoResBayes) return;
+      const { nombres, previas, verosimilitudes, evidencia, res: r } = ultimoResBayes;
+      
+      let txt = `# Actualización Bayesiana\n\n`;
+      if (evidencia) txt += `**Evidencia:** ${evidencia}\n\n`;
+      txt += `## Hipótesis y Probabilidades\n\n`;
+      txt += `| Hipótesis | P(H) | P(E\|H) | P(H\|E) | Factor |\n|---|---|---|---|---|\n`;
+      
+      r.probabilidades_posteriores.forEach((post, i) => {
+        txt += `| ${nombres[i] || 'H_' + (i+1)} | ${previas[i]} | ${verosimilitudes[i]} | ${post.toFixed(4)} | ${r.factores_actualizacion[i].toFixed(2)}x |\n`;
+      });
+      
+      txt += `\n## Resultado\n`;
+      txt += `- **Hipótesis más probable:** ${r.resumen.hipotesis_mas_probable}\n`;
+      txt += `- **Probabilidad máxima:** ${(r.resumen.probabilidad_maxima * 100).toFixed(2)}%\n`;
+      txt += `- **Evidencia marginal P(E):** ${r.evidencia_marginal.toFixed(6)}\n`;
+      txt += `\n---\n*Generado por NeuroMath Salem — Actualizador Bayesiano*`;
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(() => {
+          const msg = document.getElementById('msg-copiado-b');
+          msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
+        }).catch(() => copiarConTextareaBayes(txt));
+      } else {
+        copiarConTextareaBayes(txt);
+      }
+    }
+    
+    function copiarConTextareaBayes(texto) {
+      const textarea = document.createElement('textarea');
+      textarea.value = texto;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        const msg = document.getElementById('msg-copiado-b');
+        msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
+      } catch (err) {
+        alert('No se pudo copiar automáticamente.');
+      }
+      document.body.removeChild(textarea);
+    }
+
+  
+    // --- INFERENCIA ACTIVA ---
+    let ultimoResIA = null;
+
+    async function cargarEscenarioIA() {
+      const key = document.getElementById('ia_escenario').value;
+      try {
+        const resp = await fetch('/api/inferencia_activa/escenarios');
+        const data = await resp.json();
+        const esc = data.escenarios.find(e => e.key === key);
+        if (esc) {
+          document.getElementById('ia_desc_escenario').textContent = esc.desc;
+          // Actualizar inputs ocultos/visuales si se desea
+        }
+      } catch (e) { console.error(e); }
+    }
+
+    async function simularIA() {
+      const btn = document.getElementById('btn-ia');
+      btn.disabled = true; btn.textContent = '⏳ Simulando...';
+      
+      const C_str = document.getElementById('ia_C').value;
+      const D_str = document.getElementById('ia_D').value;
+      
+      const datos = {
+        escenario: document.getElementById('ia_escenario').value,
+        pasos: parseInt(document.getElementById('ia_pasos').value),
+        estado_inicial: parseInt(document.getElementById('ia_estado_inicial').value),
+        C: C_str.split(',').map(Number),
+        D: D_str.split(',').map(Number)
+      };
+
+      try {
+        const resp = await fetch('/api/inferencia_activa/simular', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(datos)
+        });
+        const res = await resp.json();
+        
+        if (res.ok) {
+          ultimoResIA = { escenario: res.escenario, datos: res.resultado };
+          document.getElementById('ia_nombre_escenario').textContent = res.escenario;
+          
+          const contenedor = document.getElementById('ia-historial');
+          contenedor.innerHTML = '';
+          
+          res.resultado.historial.forEach(p => {
+            const p0_antes = (p.creencias_antes[0] * 100).toFixed(0);
+            const p1_antes = (p.creencias_antes[1] * 100).toFixed(0);
+            const p0_despues = (p.creencias_despues[0] * 100).toFixed(0);
+            const p1_despues = (p.creencias_despues[1] * 100).toFixed(0);
+            const mejor_efe = p.efe_0 < p.efe_1 ? 'Acción 0' : 'Acción 1';
+            
+            contenedor.innerHTML += `
+              <div class="ia-paso">
+                <div class="ia-paso-header">
+                  <span>Paso ${p.paso}</span>
+                  <span>Estado Verdadero: ${p.estado_verdadero} | Obs: ${p.observacion}</span>
+                </div>
+                <div class="ia-detalles">
+                  <div>
+                    <span class="ia-etiqueta">Creencias Antes</span>
+                    <div class="barra-creencias">
+                      <div class="barra-est0" style="width: ${p0_antes}%"></div>
+                      <div class="barra-est1" style="width: ${p1_antes}%"></div>
+                    </div>
+                    <span class="ia-valor">Est 0: ${p0_antes}% | Est 1: ${p1_antes}%</span>
+                  </div>
+                  <div>
+                    <span class="ia-etiqueta">Decisión (Minimizar EFE)</span>
+                    <span class="ia-valor">EFE(0)=${p.efe_0} | EFE(1)=${p.efe_1}</span>
+                    <span class="ia-valor" style="color: var(--success); margin-top: 4px;">➜ Elige: Acción ${p.accion}</span>
+                  </div>
+                  <div style="grid-column: 1 / -1; margin-top: 8px;">
+                    <span class="ia-etiqueta">Creencias Después (Minimizar VFE: ${p.vfe})</span>
+                    <div class="barra-creencias">
+                      <div class="barra-est0" style="width: ${p0_despues}%"></div>
+                      <div class="barra-est1" style="width: ${p1_despues}%"></div>
+                    </div>
+                    <span class="ia-valor">Est 0: ${p0_despues}% | Est 1: ${p1_despues}%</span>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+          
+          document.getElementById('sec-ia-resultados').hidden = false;
+        } else {
+          alert('Error: ' + res.error);
+        }
+      } catch (err) {
+        alert('Error de conexión: ' + err);
+      } finally {
+        btn.disabled = false; btn.textContent = '▶️ Ejecutar Simulación';
+      }
+    }
+
+    function copiarIA() {
+      if (!ultimoResIA) return;
+      const { escenario, datos } = ultimoResIA;
+      let txt = `# Simulación de Inferencia Activa\n\n**Escenario:** ${escenario}\n\n`;
+      txt += `## Trayectoria del Agente\n\n`;
+      txt += `| Paso | Estado Real | Obs | Acción Elegida | EFE(0) | EFE(1) | VFE | Creencias (Est0 / Est1) |\n|---|---|---|---|---|---|---|---|\n`;
+      
+      datos.historial.forEach(p => {
+        txt += `| ${p.paso} | ${p.estado_verdadero} | ${p.observacion} | ${p.accion} | ${p.efe_0} | ${p.efe_1} | ${p.vfe} | ${p.creencias_despues[0]} / ${p.creencias_despues[1]} |\n`;
+      });
+      
+      txt += `\n---\n*Generado por NeuroMath Salem — Principio de Energía Libre (Friston)*`;
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(() => {
+          const msg = document.getElementById('msg-copiado-ia');
+          msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
+        }).catch(() => copiarConTextareaIA(txt));
+      } else {
+        copiarConTextareaIA(txt);
+      }
+    }
+    
+    function copiarConTextareaIA(texto) {
+      const textarea = document.createElement('textarea');
+      textarea.value = texto;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        const msg = document.getElementById('msg-copiado-ia');
+        msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
+      } catch (err) {
+        alert('No se pudo copiar automáticamente.');
+      }
+      document.body.removeChild(textarea);
+    }
+
+  
+    // --- ENTROPÍA ---
+    let ultimoResEntropia = null;
+
+    function cambiarTipoEntropia() {
+      const tipo = document.getElementById('ent_tipo').value;
+      document.getElementById('ent-seccion-simple').hidden = tipo !== 'entropia';
+      document.getElementById('ent-seccion-mutua').hidden = tipo !== 'mutua';
+    }
+
+    function cargarEjemploEntropia() {
+      document.getElementById('ent_matriz').value = '0.5, 0.05; 0.15, 0.1; 0.05, 0.15';
+    }
+
+    async function calcularEntropia() {
+      const btn = document.getElementById('btn-ent');
+      btn.disabled = true; btn.textContent = ' Calculando...';
+      
+      const tipo = document.getElementById('ent_tipo').value;
+      const base = document.getElementById('ent_base').value;
+      
+      const datos = {
+        tipo: tipo,
+        base: base === 'e' ? Math.E : parseInt(base)
+      };
+
+      try {
+        if (tipo === 'entropia') {
+          const dist_str = document.getElementById('ent_distribucion').value;
+          datos.distribucion = dist_str.split(',').map(s => parseFloat(s.trim()));
+        } else {
+          const matriz_str = document.getElementById('ent_matriz').value;
+          const filas = matriz_str.split(';').map(f => f.trim());
+          datos.matriz = filas.map(f => f.split(',').map(s => parseFloat(s.trim())));
+        }
+
+        const resp = await fetch('/api/entropia/calcular', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(datos)
+        });
+        const res = await resp.json();
+        
+        if (res.ok) {
+          ultimoResEntropia = { tipo, base, datos, res };
+          mostrarResultadosEntropia(res, tipo);
+        } else {
+          alert('Error: ' + res.error);
+        }
+      } catch (err) {
+        alert('Error: ' + err);
+      } finally {
+        btn.disabled = false; btn.textContent = '▶️ Calcular';
+      }
+    }
+
+    function mostrarResultadosEntropia(res, tipo) {
+      const contenedor = document.getElementById('ent-contenido-resultados');
+      
+      if (tipo === 'entropia') {
+        contenedor.innerHTML = `
+          <div class="resultado-principal">
+            <div class="caja-alpha">
+              <div class="etiqueta">Entropía H(X)</div>
+              <div class="valor-alpha">${res.entropia} bits</div>
+            </div>
+            <div class="caja-diagnostico">
+              <div class="etiqueta">Entropía Máxima</div>
+              <div class="valor-diagnostico">${res.entropia_maxima} bits</div>
+            </div>
+          </div>
+          <div class="info-simulacion">
+            <p><strong>Eficiencia:</strong> ${res.eficiencia}% del máximo teórico</p>
+            <p class="ayuda">Una entropía alta indica mayor incertidumbre/sorpresa. Una entropía baja indica mayor predictibilidad.</p>
+          </div>
+        `;
+      } else {
+        const r = res.resultado;
+        contenedor.innerHTML = `
+          <div class="resultado-principal">
+            <div class="caja-alpha">
+              <div class="etiqueta">Información Mutua I(X;Y)</div>
+              <div class="valor-alpha">${r.informacion_mutua} bits</div>
+            </div>
+            <div class="caja-diagnostico">
+              <div class="etiqueta">Entropía Conjunta H(X,Y)</div>
+              <div class="valor-diagnostico">${r.entropia_conjunta} bits</div>
+            </div>
+          </div>
+          <div class="info-simulacion">
+            <p><strong>Entropía de X:</strong> ${r.entropia_x} bits</p>
+            <p><strong>Entropía de Y:</strong> ${r.entropia_y} bits</p>
+            <p><strong>Entropía condicional H(X|Y):</strong> ${r.entropia_condicional_x_dado_y} bits</p>
+            <p><strong>Entropía condicional H(Y|X):</strong> ${r.entropia_condicional_y_dado_x} bits</p>
+            <p class="ayuda" style="margin-top: 10px;">La información mutua mide cuánto sabe una variable sobre la otra. Si I(X;Y) = 0, son independientes.</p>
+          </div>
+        `;
+      }
+      
+      document.getElementById('sec-ent-resultados').hidden = false;
+    }
+
+    function copiarEntropia() {
+      if (!ultimoResEntropia) return;
+      const { tipo, base, datos, res } = ultimoResEntropia;
+      
+      let txt = `# Cálculo de Entropía\n\n`;
+      txt += `**Tipo:** ${tipo === 'entropia' ? 'Entropía de Shannon' : 'Información Mutua'}\n`;
+      txt += `**Base:** ${base === Math.E ? 'e (nats)' : base}\n\n`;
+      
+      if (tipo === 'entropia') {
+        txt += `## Distribución\n`;
+        txt += `\`${datos.distribucion.join(', ')}\`\n\n`;
+        txt += `## Resultados\n`;
+        txt += `- **Entropía H(X):** ${res.entropia} bits\n`;
+        txt += `- **Entropía Máxima:** ${res.entropia_maxima} bits\n`;
+        txt += `- **Eficiencia:** ${res.eficiencia}%\n`;
+      } else {
+        txt += `## Matriz Conjunta\n`;
+        txt += `\`${datos.matriz.map(f => f.join(', ')).join('; ')}\`\n\n`;
+        const r = res.resultado;
+        txt += `## Resultados\n`;
+        txt += `- **Información Mutua I(X;Y):** ${r.informacion_mutua} bits\n`;
+        txt += `- **Entropía H(X):** ${r.entropia_x} bits\n`;
+        txt += `- **Entropía H(Y):** ${r.entropia_y} bits\n`;
+        txt += `- **Entropía Conjunta H(X,Y):** ${r.entropia_conjunta} bits\n`;
+        txt += `- **H(X|Y):** ${r.entropia_condicional_x_dado_y} bits\n`;
+        txt += `- **H(Y|X):** ${r.entropia_condicional_y_dado_x} bits\n`;
+      }
+      
+      txt += `\n---\n*Generado por NeuroMath Salem — Entropía de Shannon*`;
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(() => {
+          const msg = document.getElementById('msg-copiado-ent');
+          msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
+        }).catch(() => copiarConTextareaEntropia(txt));
+      } else {
+        copiarConTextareaEntropia(txt);
+      }
+    }
+    
+    function copiarConTextareaEntropia(texto) {
+      const textarea = document.createElement('textarea');
+      textarea.value = texto;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        const msg = document.getElementById('msg-copiado-ent');
+        msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
+      } catch (err) {
+        alert('No se pudo copiar automáticamente.');
+      }
+      document.body.removeChild(textarea);
+    }
+
+  
+    // --- MODELO DE ISING ---
+    let ultimoResIsing = null;
+
+    function presetIsing(T) {
+      document.getElementById('is_T').value = T;
+    }
+
+    async function simularIsing() {
+      const btn = document.getElementById('btn-ising');
+      btn.disabled = true; btn.textContent = '⏳ Simulando...';
+      
+      const datos = {
+        n_filas: parseInt(document.getElementById('is_n_filas').value),
+        n_cols: parseInt(document.getElementById('is_n_cols').value),
+        T: parseFloat(document.getElementById('is_T').value),
+        J: parseFloat(document.getElementById('is_J').value),
+        h: parseFloat(document.getElementById('is_h').value),
+        pasos_equilibrio: parseInt(document.getElementById('is_eq').value),
+        pasos: parseInt(document.getElementById('is_pasos').value),
+        semilla: parseInt(document.getElementById('is_semilla').value)
+      };
+
+      try {
+        const resp = await fetch('/api/ising/simular', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(datos)
+        });
+        const res = await resp.json();
+        
+        if (res.ok) {
+          ultimoResIsing = { datos, res: res.resultado };
+          const r = res.resultado.resultados;
+          
+          document.getElementById('is_M_final').textContent = r.M_final.toFixed(4);
+          document.getElementById('is_fase').textContent = r.fase;
+          document.getElementById('is_fase').style.color = 
+            r.color_fase === 'verde' ? 'var(--success)' : 
+            r.color_fase === 'rojo' ? 'var(--danger)' : 'var(--warning)';
+          document.getElementById('is_E_final').textContent = r.E_final.toFixed(2);
+          document.getElementById('is_M_abs').textContent = r.M_abs_promedio.toFixed(4);
+          document.getElementById('is_Tc').textContent = r.T_c_teorica.toFixed(4);
+          
+          // Dibujar grid final
+          dibujarGridIsing(res.resultado.grid_final, datos.n_filas, datos.n_cols);
+          
+          // Dibujar evolución de M
+          dibujarEvolucionM(res.resultado.historial.M);
+          
+          document.getElementById('sec-ising-resultados').hidden = false;
+        } else {
+          alert('Error: ' + res.error);
+        }
+      } catch (err) {
+        alert('Error: ' + err);
+      } finally {
+        btn.disabled = false; btn.textContent = '▶️ Ejecutar Simulación';
+      }
+    }
+
+    function dibujarGridIsing(grid, n_filas, n_cols) {
+      const canvas = document.getElementById('canvas-ising');
+      const ctx = canvas.getContext('2d');
+      const tamano_celda = Math.min(15, Math.floor(400 / Math.max(n_filas, n_cols)));
+      canvas.width = n_cols * tamano_celda;
+      canvas.height = n_filas * tamano_celda;
+      
+      for (let i = 0; i < n_filas; i++) {
+        for (let j = 0; j < n_cols; j++) {
+          // grid[i][j] está en [0, 1]: 0 = espín -1, 1 = espín +1
+          const valor = grid[i][j];
+          ctx.fillStyle = valor > 0.5 ? '#ef4444' : '#3b82f6';
+          ctx.fillRect(j * tamano_celda, i * tamano_celda, tamano_celda, tamano_celda);
+        }
+      }
+    }
+
+    
+    function dibujarEvolucionM(historial_M) {
+      const canvas = document.getElementById('canvas-M');
+      const ctx = canvas.getContext('2d');
+      
+      // Obtener el tamaño real renderizado (no el atributo width/height)
+      const rect = canvas.getBoundingClientRect();
+      const W = rect.width;
+      const H = rect.height || 200;
+      
+      // Ajustar el tamaño interno del canvas al tamaño CSS
+      canvas.width = W;
+      canvas.height = H;
+      
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, W, H);
+      
+      const n = historial_M.length;
+      const escala_x = W / n;
+      const escala_y = (H - 40) / 2; // Dejar margen para etiquetas
+      
+      // Eje central (M = 0)
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, H/2);
+      ctx.lineTo(W, H/2);
+      ctx.stroke();
+      
+      // Línea de M
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        const x = i * escala_x;
+        const y = H/2 - historial_M[i] * escala_y;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      
+      // Etiquetas
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px sans-serif';
+      ctx.fillText('M = +1', 5, 15);
+      ctx.fillText('M = 0', 5, H/2 - 5);
+      ctx.fillText('M = -1', 5, H - 5);
+      
+      // Línea de tiempo
+      ctx.fillText('0', 5, H - 15);
+      ctx.fillText(historial_M.length.toString(), W - 20, H - 15);
+    }
+
+
+    function copiarIsing() {
+      if (!ultimoResIsing) return;
+      const { datos: p, res: r } = ultimoResIsing;
+      const res = r.resultados;
+      
+      let txt = `# Simulación del Modelo de Ising\n\n`;
+      txt += `## Parámetros\n`;
+      txt += `- **Grid:** ${p.n_filas}x${p.n_cols}\n`;
+      txt += `- **Temperatura T:** ${p.T}\n`;
+      txt += `- **Acoplamiento J:** ${p.J}\n`;
+      txt += `- **Campo h:** ${p.h}\n`;
+      txt += `- **Pasos de equilibrio:** ${p.pasos_equilibrio}\n`;
+      txt += `- **Pasos de medición:** ${p.pasos}\n\n`;
+      txt += `## Resultados\n`;
+      txt += `- **Magnetización final M:** ${res.M_final}\n`;
+      txt += `- **Energía final E:** ${res.E_final}\n`;
+      txt += `- **|M| promedio:** ${res.M_abs_promedio}\n`;
+      txt += `- **T_c teórica:** ${res.T_c_teorica}\n`;
+      txt += `- **Fase:** ${res.fase}\n\n`;
+      txt += `## Interpretación\n`;
+      if (res.M_abs_promedio > 0.5) {
+        txt += `El sistema está en fase **ferromagnética**: los espines se alinean espontáneamente.\n`;
+      } else if (res.M_abs_promedio < 0.2) {
+        txt += `El sistema está en fase **paramagnética**: los espines están desordenados.\n`;
+      } else {
+        txt += `El sistema está cerca de la **temperatura crítica**: transición de fase.\n`;
+      }
+      txt += `\n---\n*Generado por NeuroMath Salem — Modelo de Ising*`;
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(() => {
+          const msg = document.getElementById('msg-copiado-is');
+          msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
+        }).catch(() => copiarConTextareaIsing(txt));
+      } else {
+        copiarConTextareaIsing(txt);
+      }
+    }
+    
+    function copiarConTextareaIsing(texto) {
+      const textarea = document.createElement('textarea');
+      textarea.value = texto;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        const msg = document.getElementById('msg-copiado-is');
+        msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
+      } catch (err) {
+        alert('No se pudo copiar automáticamente.');
+      }
+      document.body.removeChild(textarea);
+    }
+
+  
+    // --- MODELO DE KURAMOTO ---
+    let ultimoResKuramoto = null;
+
+    function presetKuramoto(K) {
+      document.getElementById('ku_K').value = K;
+    }
+
+    async function simularKuramoto() {
+      const btn = document.getElementById('btn-kuramoto');
+      btn.disabled = true; btn.textContent = '⏳ Simulando...';
+      
+      const datos = {
+        n_osciladores: parseInt(document.getElementById('ku_n').value),
+        K: parseFloat(document.getElementById('ku_K').value),
+        tiempo_total: parseFloat(document.getElementById('ku_tiempo').value),
+        dt: 0.01,
+        distribucion: document.getElementById('ku_dist').value,
+        ancho: parseFloat(document.getElementById('ku_ancho').value),
+        semilla: parseInt(document.getElementById('ku_semilla').value)
+      };
+
+      try {
+        const resp = await fetch('/api/kuramoto/simular', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(datos)
+        });
+        const res = await resp.json();
+        
+        if (res.ok) {
+          ultimoResKuramoto = { datos, res: res.resultado };
+          const r = res.resultado.resultados;
+          
+          document.getElementById('ku_r_final').textContent = r.r_final.toFixed(4);
+          document.getElementById('ku_estado').textContent = r.estado;
+          document.getElementById('ku_estado').style.color = 
+            r.color === 'verde' ? '#10b981' : 
+            r.color === 'rojo' ? '#ef4444' : '#f59e0b';
+          document.getElementById('ku_psi').textContent = r.psi_final.toFixed(4);
+          document.getElementById('ku_Kc').textContent = r.K_c_teorico || 'N/A';
+          
+          dibujarEvolucionR(res.resultado.historial.r);
+          dibujarDistribucionFases(res.resultado.fases_finales);
+          
+          document.getElementById('sec-kuramoto-resultados').hidden = false;
+          document.getElementById('sec-barrido').hidden = true;
+        } else {
+          alert('Error: ' + res.error);
+        }
+      } catch (err) {
+        alert('Error: ' + err);
+      } finally {
+        btn.disabled = false; btn.textContent = '▶️ Ejecutar Simulación';
+      }
+    }
+
+    async function barridoKuramoto() {
+      const btn = document.getElementById('btn-kuramoto');
+      btn.disabled = true; btn.textContent = '⏳ Barrido...';
+      
+      const datos = {
+        n_osciladores: parseInt(document.getElementById('ku_n').value),
+        K_min: 0.0,
+        K_max: 4.0,
+        K_pasos: 20,
+        tiempo_total: 5.0,
+        dt: 0.01,
+        distribucion: document.getElementById('ku_dist').value,
+        ancho: parseFloat(document.getElementById('ku_ancho').value),
+        semilla: parseInt(document.getElementById('ku_semilla').value)
+      };
+
+      try {
+        const resp = await fetch('/api/kuramoto/barrido', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(datos)
+        });
+        const res = await resp.json();
+        
+        if (res.ok) {
+          dibujarBarridoK(res.resultados);
+          document.getElementById('sec-barrido').hidden = false;
+        } else {
+          alert('Error: ' + res.error);
+        }
+      } catch (err) {
+        alert('Error: ' + err);
+      } finally {
+        btn.disabled = false; btn.textContent = '▶️ Ejecutar Simulación';
+      }
+    }
+
+    
+    function dibujarEvolucionR(historial_r) {
+      const canvas = document.getElementById('canvas-r');
+      const ctx = canvas.getContext('2d');
+      
+      const rect = canvas.getBoundingClientRect();
+      const W = rect.width || 600;
+      const H = rect.height || 200;
+      
+      canvas.width = W;
+      canvas.height = H;
+      
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, W, H);
+      
+      const n = historial_r.length;
+      const escala_x = W / n;
+      const escala_y = H - 40;
+      
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      [0, 0.5, 1.0].forEach(r_ref => {
+        const y = H - 20 - r_ref * escala_y;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(W, y);
+        ctx.stroke();
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '11px sans-serif';
+        ctx.fillText(`r=${r_ref}`, 5, y - 5);
+      });
+      
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        const x = i * escala_x;
+        const y = H - 20 - historial_r[i] * escala_y;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+
+    
+    function dibujarDistribucionFases(fases) {
+      const canvas = document.getElementById('canvas-fases');
+      const ctx = canvas.getContext('2d');
+      
+      const rect = canvas.getBoundingClientRect();
+      const W = rect.width || 600;
+      const H = rect.height || 200;
+      
+      canvas.width = W;
+      canvas.height = H;
+      
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, W, H);
+      
+      const n_bins = 36;
+      const bin_width = (2 * Math.PI) / n_bins;
+      const histograma = new Array(n_bins).fill(0);
+      
+      fases.forEach(fase => {
+        const bin = Math.floor(fase / bin_width) % n_bins;
+        histograma[bin]++;
+      });
+      
+      const max_count = Math.max(...histograma);
+      const bar_width = W / n_bins;
+      
+      histograma.forEach((count, i) => {
+        const bar_height = (count / max_count) * (H - 40);
+        const x = i * bar_width;
+        const y = H - 20 - bar_height;
+        
+        ctx.fillStyle = '#3b82f6';
+        ctx.fillRect(x, y, bar_width - 1, bar_height);
+      });
+      
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px sans-serif';
+      ctx.fillText('0', 5, H - 5);
+      ctx.fillText('π', W/2 - 10, H - 5);
+      ctx.fillText('2π', W - 25, H - 5);
+    }
+
+
+    
+    function dibujarBarridoK(resultados) {
+      const canvas = document.getElementById('canvas-barrido');
+      const ctx = canvas.getContext('2d');
+      
+      const rect = canvas.getBoundingClientRect();
+      const W = rect.width || 600;
+      const H = rect.height || 300;
+      
+      canvas.width = W;
+      canvas.height = H;
+      
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, W, H);
+      
+      const n = resultados.length;
+      const K_max = Math.max(...resultados.map(r => r.K));
+      const escala_x = (W - 60) / K_max;
+      const escala_y = H - 60;
+      
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(40, 20);
+      ctx.lineTo(40, H - 40);
+      ctx.lineTo(W - 20, H - 40);
+      ctx.stroke();
+      
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '12px sans-serif';
+      ctx.fillText('K', W/2, H - 10);
+      ctx.save();
+      ctx.translate(15, H/2);
+      ctx.rotate(-Math.PI/2);
+      ctx.fillText('r', 0, 0);
+      ctx.restore();
+      
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      resultados.forEach((punto, i) => {
+        const x = 40 + punto.K * escala_x;
+        const y = H - 40 - punto.r * escala_y;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      
+      resultados.forEach(punto => {
+        const x = 40 + punto.K * escala_x;
+        const y = H - 40 - punto.r * escala_y;
+        ctx.fillStyle = '#3b82f6';
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, 2 * Math.PI);
+        ctx.fill();
+      });
+    }
+
+
+    function copiarKuramoto() {
+      if (!ultimoResKuramoto) return;
+      const { datos: p, res: r } = ultimoResKuramoto;
+      const res = r.resultados;
+      
+      let txt = `# Simulación del Modelo de Kuramoto\n\n`;
+      txt += `## Parámetros\n`;
+      txt += `- **N° de osciladores:** ${p.n_osciladores}\n`;
+      txt += `- **Acoplamiento K:** ${p.K}\n`;
+      txt += `- **Tiempo total:** ${p.tiempo_total}\n`;
+      txt += `- **Distribución:** ${p.distribucion} (ancho=${p.ancho})\n\n`;
+      txt += `## Resultados\n`;
+      txt += `- **Parámetro de orden r:** ${res.r_final}\n`;
+      txt += `- **Fase media ψ:** ${res.psi_final} rad\n`;
+      txt += `- **K_c teórico:** ${res.K_c_teorico || 'N/A'}\n`;
+      txt += `- **Estado:** ${res.estado}\n\n`;
+      txt += `## Interpretación\n`;
+      if (res.r_final > 0.7) {
+        txt += `El sistema está **sincronizado**: los osciladores oscilan al unísono.\n`;
+      } else if (res.r_final < 0.3) {
+        txt += `El sistema está **desincronizado**: cada oscilador sigue su propia frecuencia.\n`;
+      } else {
+        txt += `El sistema está **parcialmente sincronizado**: en transición hacia el orden.\n`;
+      }
+      txt += `\n---\n*Generado por NeuroMath Salem — Modelo de Kuramoto*`;
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(() => {
+          const msg = document.getElementById('msg-copiado-ku');
+          msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
+        }).catch(() => copiarConTextareaKuramoto(txt));
+      } else {
+        copiarConTextareaKuramoto(txt);
+      }
+    }
+    
+    function copiarConTextareaKuramoto(texto) {
+      const textarea = document.createElement('textarea');
+      textarea.value = texto;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        const msg = document.getElementById('msg-copiado-ku');
+        msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
+      } catch (err) {
+        alert('No se pudo copiar automáticamente.');
+      }
+      document.body.removeChild(textarea);
+    }
+
+  </script>
+</body>
+</html>

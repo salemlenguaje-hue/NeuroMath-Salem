@@ -1,0 +1,440 @@
+:root {
+  --fondo: #0f172a;
+  --tarjeta: #1e293b;
+  --texto: #f1f5f9;
+  --texto-suave: #94a3b8;
+  --acento: #3b82f6;
+  --acento-hover: #2563eb;
+  --borde: #334155;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: system-ui, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  line-height: 1.6;
+  padding: 20px;
+}
+
+.encabezado { text-align: center; margin-bottom: 30px; }
+.encabezado .logo { font-size: 1.8rem; font-weight: 800; color: var(--acento); }
+.encabezado .subtitulo { color: var(--texto-suave); font-size: 0.95rem; }
+
+.contenedor { max-width: 900px; margin: 0 auto; }
+.tarjeta {
+  background: var(--tarjeta);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  border: 1px solid var(--borde);
+}
+.tarjeta h2 { 
+  font-size: 1.2rem; 
+  margin-bottom: 20px; 
+  color: var(--acento); 
+  border-bottom: 1px solid var(--borde); 
+  padding-bottom: 10px; 
+}
+.tarjeta h3 {
+  font-size: 1rem;
+  margin: 15px 0 10px;
+  color: var(--texto-suave);
+}
+
+.fila-parametros { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px; }
+.grupo { flex: 1; min-width: 120px; }
+.grupo label { display: block; font-size: 0.85rem; color: var(--texto-suave); margin-bottom: 6px; font-weight: 600; }
+.grupo input {
+  width: 100%;
+  padding: 10px;
+  background: var(--fondo);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  color: var(--texto);
+  font-size: 1rem;
+}
+.grupo input:focus { outline: none; border-color: var(--acento); }
+
+.boton-ejecutar {
+  width: 100%;
+  padding: 14px;
+  background: var(--acento);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+}
+.boton-ejecutar:hover { background: var(--acento-hover); }
+.boton-ejecutar:disabled { background: var(--borde); cursor: not-allowed; }
+
+.boton-secundario {
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--acento);
+  border: 1px solid var(--acento);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+}
+
+.resultado-principal { display: flex; gap: 20px; margin-bottom: 25px; flex-wrap: wrap; }
+.caja-alpha, .caja-diagnostico { flex: 1; background: var(--fondo); padding: 20px; border-radius: 10px; text-align: center; border: 1px solid var(--borde); }
+.etiqueta { font-size: 0.85rem; color: var(--texto-suave); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.valor-alpha { font-size: 2.5rem; font-weight: 800; color: var(--acento); }
+.valor-diagnostico { font-size: 1.1rem; font-weight: 600; }
+
+.contenedor-canvas {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  background: var(--fondo);
+  border-radius: 8px;
+  margin-top: 10px;
+}
+#canvas-grid {
+  border: 2px solid var(--borde);
+  image-rendering: pixelated;
+}
+
+.tabla-resultados { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.tabla-resultados th, .tabla-resultados td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--borde);
+}
+.tabla-resultados th { color: var(--texto-suave); font-weight: 600; font-size: 0.9rem; }
+
+.lista-historial { max-height: 400px; overflow-y: auto; }
+.item-historial {
+  background: var(--fondo);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  border-left: 3px solid var(--acento);
+}
+.historial-fecha { font-size: 0.85rem; color: var(--texto-suave); margin-bottom: 5px; }
+.historial-datos { font-size: 1rem; margin-bottom: 5px; }
+.historial-params { font-size: 0.85rem; color: var(--texto-suave); }
+
+.cargador {
+  position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 100;
+}
+.spinner {
+  width: 40px; height: 40px; border: 4px solid var(--borde);
+  border-top-color: var(--acento); border-radius: 50%;
+  animation: girar 1s linear infinite; margin-bottom: 15px;
+}
+@keyframes girar { to { transform: rotate(360deg); } }
+.cargador p { color: var(--texto-suave); }
+
+.ayuda { color: var(--texto-suave); font-size: 0.9rem; font-style: italic; }
+.error { color: #ef4444; }
+
+[hidden] { display: none !important; }
+
+/* =====================================================
+   BOTÓN COPIAR Y MENSAJE DE ÉXITO
+   ===================================================== */
+.boton-copiar {
+  margin-top: 20px;
+  padding: 12px 20px;
+  background: var(--tarjeta);
+  color: var(--acento);
+  border: 2px solid var(--acento);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s;
+}
+.boton-copiar:hover {
+  background: var(--acento);
+  color: white;
+}
+.mensaje-exito {
+  text-align: center;
+  padding: 10px;
+  background: #10b981;
+  color: white;
+  border-radius: 8px;
+  margin-top: 10px;
+  font-weight: 700;
+  animation: aparecer 0.3s ease;
+}
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* =====================================================
+   PESTAÑAS Y MODELO EMOCIONAL
+   ===================================================== */
+.pestanas {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--borde);
+  padding-bottom: 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--acento) var(--fondo);
+}
+.pestanas::-webkit-scrollbar {
+  height: 4px;
+}
+.pestanas::-webkit-scrollbar-thumb {
+  background: var(--acento);
+  border-radius: 4px;
+}
+}
+.pestaña {
+  flex: 0 0 auto;
+  min-width: 120px;
+  white-space: nowrap;
+.pestaña.activa {
+  background: var(--tarjeta);
+  color: var(--acento);
+  border: 1px solid var(--borde);
+  border-bottom: 2px solid var(--tarjeta);
+  margin-bottom: -12px;
+}
+
+input[type="range"] {
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+.barras-emociones {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 15px 0;
+}
+.barra-emocion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.barra-nombre {
+  width: 120px;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+  text-align: right;
+}
+.barra-fondo {
+  flex: 1;
+  height: 12px;
+  background: var(--fondo);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--borde);
+}
+.barra-relleno {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.5s ease;
+}
+.barra-valor {
+  width: 40px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+/* =====================================================
+   HISTORIAL DE SIMULACIONES Y CHECKPOINTS
+   ===================================================== */
+.lista-simulaciones {
+  max-height: 500px;
+  overflow-y: auto;
+}
+.item-simulacion {
+  background: var(--fondo);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  border-left: 3px solid var(--acento);
+}
+.simulacion-nombre {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+.simulacion-fecha {
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+  margin-bottom: 6px;
+}
+.simulacion-datos {
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+.boton-chico {
+  padding: 6px 12px;
+  background: var(--acento);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.boton-chico:hover {
+  background: var(--acento-hover);
+}
+.info-simulacion {
+  background: var(--fondo);
+  padding: 12px;
+  border-radius: 8px;
+  margin: 15px 0;
+  border-left: 3px solid var(--acento);
+}
+.info-simulacion p {
+  margin: 6px 0;
+  font-size: 0.9rem;
+}
+.tabla-checkpoints {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 0.85rem;
+}
+.tabla-checkpoints th, .tabla-checkpoints td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--borde);
+}
+.tabla-checkpoints th {
+  background: var(--fondo);
+  color: var(--texto-suave);
+  font-weight: 600;
+}
+
+/* =====================================================
+   PESTAÑA BAYES
+   ===================================================== */
+.lista-hipotesis {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+.item-hipotesis {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: var(--fondo);
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--borde);
+}
+.item-hipotesis input[type="text"] {
+  flex: 2;
+  padding: 8px;
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  color: var(--texto);
+  font-size: 0.9rem;
+}
+.item-hipotesis input[type="number"] {
+  flex: 1;
+  padding: 8px;
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  color: var(--texto);
+  font-size: 0.9rem;
+}
+.item-hipotesis button {
+  background: var(--danger);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.detalle-bayes {
+  background: var(--fondo);
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  font-family: monospace;
+  font-size: 0.85rem;
+  line-height: 1.8;
+}
+.detalle-bayes .paso {
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--borde);
+}
+.detalle-bayes .paso:last-child {
+  border-bottom: none;
+}
+.detalle-bayes .formula {
+  color: var(--acento);
+  font-weight: 700;
+}
+
+/* =====================================================
+   INFERENCIA ACTIVA
+   ===================================================== */
+.ia-historial {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 15px;
+}
+.ia-paso {
+  background: var(--fondo);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 12px;
+}
+.ia-paso-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  color: var(--acento);
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--borde);
+  padding-bottom: 6px;
+}
+.ia-detalles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  font-size: 0.85rem;
+}
+.ia-detalles div {
+  display: flex;
+  flex-direction: column;
+}
+.ia-etiqueta {
+  color: var(--texto-suave);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+.ia-valor {
+  font-weight: 600;
+  font-family: monospace;
+}
+.barra-creencias {
+  display: flex;
+  height: 20px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 8px;
+  border: 1px solid var(--borde);
+}
+.barra-est0 { background: var(--acento); }
+.barra-est1 { background: var(--success); }
