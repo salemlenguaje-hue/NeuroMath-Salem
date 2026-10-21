@@ -421,6 +421,65 @@ def api_kuramoto_barrido():
         return jsonify({"ok": True, "resultados": resultados})
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
+
+@app.route('/api/hopfield/simular', methods=['POST'])
+def api_hopfield_simular():
+    """Simula la Red de Hopfield con parámetros configurables."""
+    from modelo_hopfield import simular_hopfield
+    
+    datos = request.get_json()
+    
+    try:
+        resultado = simular_hopfield(
+            n_neuronas=int(datos.get('n_neuronas', 100)),
+            n_patrones=int(datos.get('n_patrones', 3)),
+            probabilidad_ruido=float(datos.get('probabilidad_ruido', 0.2)),
+            pasos_maximos=int(datos.get('pasos_maximos', 500)),
+            semilla=int(datos.get('semilla', 42))
+        )
+        return jsonify({"ok": True, "resultado": resultado})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+@app.route('/api/potencial_accion/simular', methods=['POST'])
+def api_potencial_accion_simular():
+    """Simula el potencial de acción (FitzHugh-Nagumo)."""
+    from modelo_potencial_accion import simular_potencial_accion
+    
+    datos = request.get_json()
+    
+    try:
+        resultado = simular_potencial_accion(
+            I_ext=float(datos.get('I_ext', 1.0)),
+            tiempo_total=float(datos.get('tiempo_total', 50.0)),
+            dt=0.1,
+            epsilon=float(datos.get('epsilon', 0.08)),
+            a=float(datos.get('a', 0.7)),
+            b=float(datos.get('b', 0.8)),
+            V0=float(datos.get('V0', -1.0)),
+            W0=float(datos.get('W0', -1.0))
+        )
+        return jsonify({"ok": True, "resultado": resultado})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+@app.route('/api/landau/calcular', methods=['POST'])
+def api_landau_calcular():
+    """Calcula el potencial de Landau-Ginzburg."""
+    from modelo_landau import calcular_potencial_landau
+    
+    datos = request.get_json()
+    try:
+        a = float(datos.get('a', 1.0))
+        b = float(datos.get('b', 1.0))
+        resultado = calcular_potencial_landau(a, b)
+        return jsonify({
+            "ok": True, 
+            "resultado": resultado, 
+            "parametros": {"a": a, "b": b}
+        })
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
 if __name__ == '__main__':
     print()
     print("╔══════════════════════════════════════════════════════╗")

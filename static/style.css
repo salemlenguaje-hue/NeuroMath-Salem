@@ -438,3 +438,34 @@ input[type="range"] {
 }
 .barra-est0 { background: var(--acento); }
 .barra-est1 { background: var(--success); }
+
+/* =====================================================
+   HOPFIELD
+   ===================================================== */
+#canvas-hf-inicial, #canvas-hf-final {
+  width: 100%;
+  max-width: 250px;
+  height: auto;
+  border: 2px solid var(--borde);
+  image-rendering: pixelated;
+}
+
+/* =====================================================
+   POTENCIAL DE ACCIÓN (FHN)
+   ===================================================== */
+#canvas-fhn {
+  width: 100% !important;
+  max-width: 100%;
+  height: auto;
+  min-height: 300px;
+}
+
+/* =====================================================
+   LANDAU-GINZBURG
+   ===================================================== */
+#canvas-landau {
+  width: 100% !important;
+  max-width: 100%;
+  height: auto;
+  min-height: 300px;
+}

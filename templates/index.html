@@ -95,6 +95,9 @@
     <button class="pestaña" onclick="cambiarPestana('emocional')">❤️ Emocional y Valencia</button>
     <button class="pestaña" onclick="cambiarPestana('kuramoto')">🌊 Kuramoto</button>
     <button class="pestaña" onclick="cambiarPestana('ising')">🧲 Ising</button>
+    <button class="pestaña" onclick="cambiarPestana('landau')">🔬 Landau-Ginzburg</button>
+    <button class="pestaña" onclick="cambiarPestana('fhn')">⚡ Potencial de Acción</button>
+    <button class="pestaña" onclick="cambiarPestana('hopfield')">🧠 Hopfield</button>
     <button class="pestaña" onclick="cambiarPestana('entropia')">📊 Entropía</button>
     <button class="pestaña" onclick="cambiarPestana('inferencia')">🧠 Inferencia Activa</button>
     <button class="pestaña" onclick="cambiarPestana('bayes')">🎯 Bayes</button>
@@ -364,6 +367,196 @@
         </button>
         <button class="boton-copiar" onclick="copiarIsing()" style="margin-top: 15px;">📋 Copiar reporte</button>
         <div id="msg-copiado-is" class="mensaje-exito" hidden>✅ Copiado</div>
+      </section>
+    </div>
+
+    
+    
+    
+    <!-- PESTAÑA LANDAU-GINZBURG -->
+    <div id="tab-landau" class="contenido-pestaña" hidden>
+      <section class="tarjeta">
+        <h2>🔬 Teoría de Landau-Ginzburg (Transiciones de Fase)</h2>
+        <p class="ayuda">Modelo teórico que describe cómo cambia el potencial de energía libre F(ψ) = aψ² + bψ⁴ al variar el parámetro de control 'a' (temperatura).</p>
+        
+        <h3>Parámetros del Potencial</h3>
+        <div class="fila-parametros">
+          <div class="grupo">
+            <label>Parámetro 'a' (Control / Temperatura)</label>
+            <input type="range" id="lg_a" min="-2" max="2" step="0.1" value="1.0" oninput="document.getElementById('val-a').textContent=this.value">
+            <span id="val-a">1.0</span>
+          </div>
+          <div class="grupo">
+            <label>Parámetro 'b' (Estabilidad)</label>
+            <input type="number" id="lg_b" step="0.1" value="1.0" min="0.1" max="5">
+          </div>
+        </div>
+
+        <div class="presets-landau" style="margin: 15px 0;">
+          <button class="boton-chico" onclick="presetLandau(1.0)">a = 1.0 (Desorden)</button>
+          <button class="boton-chico" onclick="presetLandau(0.0)">a = 0.0 (Crítico)</button>
+          <button class="boton-chico" onclick="presetLandau(-1.0)">a = -1.0 (Orden)</button>
+        </div>
+
+        <button type="button" class="boton-ejecutar" id="btn-landau" onclick="calcularLandau()">▶️ Calcular Potencial</button>
+      </section>
+
+      <section class="tarjeta" id="sec-landau-resultados" hidden>
+        <h2>📊 Perfil de Energía Libre</h2>
+        
+        <div class="resultado-principal">
+          <div class="caja-alpha">
+            <div class="etiqueta">Parámetro de Orden en Equilibrio (ψ_eq)</div>
+            <div class="valor-alpha" id="lg_psi_eq">--</div>
+          </div>
+          <div class="caja-diagnostico">
+            <div class="etiqueta">Fase del Sistema</div>
+            <div class="valor-diagnostico" id="lg_fase">--</div>
+          </div>
+        </div>
+
+        <div class="info-simulacion">
+          <p><strong>Descripción:</strong> <span id="lg_desc">--</span></p>
+          <p><strong>Energía mínima (F_min):</strong> <span id="lg_f_min">--</span></p>
+        </div>
+
+        <h3>Gráfico del Potencial F(ψ)</h3>
+        <div class="contenedor-canvas">
+          <canvas id="canvas-landau" width="600" height="300"></canvas>
+        </div>
+
+        <button class="boton-secundario" onclick="window.print()" style="margin-top: 15px; margin-right: 10px;">🖨️ Imprimir</button>
+        <button class="boton-copiar" onclick="copiarLandau()" style="margin-top: 15px;">📋 Copiar reporte</button>
+        <div id="msg-copiado-lg" class="mensaje-exito" hidden>✅ Copiado</div>
+      </section>
+    </div>
+
+    <!-- PESTAÑA POTENCIAL DE ACCIÓN -->
+    <div id="tab-fhn" class="contenido-pestaña" hidden>
+      <section class="tarjeta">
+        <h2>⚡ Potencial de Acción (FitzHugh-Nagumo)</h2>
+        <p class="ayuda">Simplificación del modelo Hodgkin-Huxley. Muestra cómo una corriente externa (I_ext) genera un "spike" eléctrico si supera el umbral.</p>
+        
+        <h3>Estímulo y Tiempo</h3>
+        <div class="fila-parametros">
+          <div class="grupo">
+            <label>Corriente Externa (I_ext)</label>
+            <input type="range" id="fhn_I" min="0" max="2" step="0.1" value="1.0" oninput="document.getElementById('val-I').textContent=this.value">
+            <span id="val-I">1.0</span>
+          </div>
+          <div class="grupo"><label>Tiempo total</label><input type="number" id="fhn_tiempo" value="50" min="10" max="100"></div>
+        </div>
+
+        <h3>Parámetros de la Neurona</h3>
+        <div class="fila-parametros">
+          <div class="grupo"><label>ε (velocidad recuperación)</label><input type="number" id="fhn_eps" step="0.01" value="0.08" min="0.01" max="0.5"></div>
+          <div class="grupo"><label>a (umbral)</label><input type="number" id="fhn_a" step="0.1" value="0.7" min="0" max="2"></div>
+          <div class="grupo"><label>b (escala recuperación)</label><input type="number" id="fhn_b" step="0.1" value="0.8" min="0.1" max="2"></div>
+        </div>
+
+        <div class="presets-fhn" style="margin: 15px 0;">
+          <button class="boton-chico" onclick="presetFHN(0.5)">I=0.5 (Subumbral)</button>
+          <button class="boton-chico" onclick="presetFHN(1.0)">I=1.0 (Spike)</button>
+          <button class="boton-chico" onclick="presetFHN(1.5)">I=1.5 (Spike Rápido)</button>
+        </div>
+
+        <button type="button" class="boton-ejecutar" id="btn-fhn" onclick="simularFHN()">▶️ Simular Neurona</button>
+      </section>
+
+      <section class="tarjeta" id="sec-fhn-resultados" hidden>
+        <h2>📊 Resultados de la Simulación</h2>
+        
+        <div class="resultado-principal">
+          <div class="caja-alpha">
+            <div class="etiqueta">Voltaje Máximo (V)</div>
+            <div class="valor-alpha" id="fhn_max_V">--</div>
+          </div>
+          <div class="caja-diagnostico">
+            <div class="etiqueta">Estado de la Neurona</div>
+            <div class="valor-diagnostico" id="fhn_estado">--</div>
+          </div>
+        </div>
+
+        <h3>Trayectoria del Voltaje (V) y Recuperación (W)</h3>
+        <div class="contenedor-canvas">
+          <canvas id="canvas-fhn" width="600" height="300"></canvas>
+        </div>
+
+        <button class="boton-secundario" onclick="window.print()" style="margin-top: 15px; margin-right: 10px;">🖨️ Imprimir</button>
+        <button class="boton-copiar" onclick="copiarFHN()" style="margin-top: 15px;">📋 Copiar reporte</button>
+        <div id="msg-copiado-fhn" class="mensaje-exito" hidden>✅ Copiado</div>
+      </section>
+    </div>
+
+    <!-- PESTAÑA HOPFIELD -->
+    <div id="tab-hopfield" class="contenido-pestaña" hidden>
+      <section class="tarjeta">
+        <h2>🧠 Red de Hopfield (Memoria Asociativa)</h2>
+        <p class="ayuda">La red almacena patrones y recupera el más parecido a partir de una entrada ruidosa, minimizando su energía.</p>
+        
+        <h3>Parámetros de la Red</h3>
+        <div class="fila-parametros">
+          <div class="grupo"><label>N° de neuronas</label><input type="number" id="hf_n" value="100" min="25" max="400"></div>
+          <div class="grupo"><label>Patrones a almacenar</label><input type="number" id="hf_p" value="3" min="1" max="10"></div>
+          <div class="grupo"><label>Semilla</label><input type="number" id="hf_semilla" value="42" min="1"></div>
+        </div>
+
+        <h3>Prueba de Recuperación</h3>
+        <div class="fila-parametros">
+          <div class="grupo">
+            <label>Nivel de ruido (%)</label>
+            <input type="range" id="hf_ruido" min="0" max="50" step="5" value="20" oninput="document.getElementById('val-ruido').textContent=this.value+'%'">
+            <span id="val-ruido">20%</span>
+          </div>
+          <div class="grupo"><label>Pasos máximos</label><input type="number" id="hf_pasos" value="500" min="50" max="2000"></div>
+        </div>
+
+        <button type="button" class="boton-ejecutar" id="btn-hopfield" onclick="simularHopfield()">▶️ Ejecutar Recuperación</button>
+      </section>
+
+      <section class="tarjeta" id="sec-hopfield-resultados" hidden>
+        <h2>📊 Resultados de la Recuperación</h2>
+        
+        <div class="resultado-principal">
+          <div class="caja-alpha">
+            <div class="etiqueta">Similitud con el original</div>
+            <div class="valor-alpha" id="hf_similitud">--</div>
+          </div>
+          <div class="caja-diagnostico">
+            <div class="etiqueta">Estado de la Red</div>
+            <div class="valor-diagnostico" id="hf_estado">--</div>
+          </div>
+        </div>
+
+        <div class="info-simulacion">
+          <p><strong>Energía inicial:</strong> <span id="hf_e_inicial">--</span></p>
+          <p><strong>Energía final:</strong> <span id="hf_e_final">--</span></p>
+          <p><strong>Pasos hasta converger:</strong> <span id="hf_pasos_ejecutados">--</span></p>
+        </div>
+
+        <div class="fila-parametros" style="margin-top: 20px;">
+          <div style="flex: 1; text-align: center;">
+            <h4>Entrada Ruidosa</h4>
+            <div class="contenedor-canvas">
+              <canvas id="canvas-hf-inicial"></canvas>
+            </div>
+          </div>
+          <div style="flex: 1; text-align: center;">
+            <h4>Patrón Recuperado</h4>
+            <div class="contenedor-canvas">
+              <canvas id="canvas-hf-final"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 20px;">Descenso de Energía</h3>
+        <div class="contenedor-canvas">
+          <canvas id="canvas-hf-energia" width="600" height="200"></canvas>
+        </div>
+
+        <button class="boton-secundario" onclick="window.print()" style="margin-top: 15px; margin-right: 10px;">🖨️ Imprimir</button>
+        <button class="boton-copiar" onclick="copiarHopfield()" style="margin-top: 15px;">📋 Copiar reporte</button>
+        <div id="msg-copiado-hf" class="mensaje-exito" hidden>✅ Copiado</div>
       </section>
     </div>
 
@@ -1794,6 +1987,526 @@
       try {
         document.execCommand('copy');
         const msg = document.getElementById('msg-copiado-ku');
+        msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
+      } catch (err) {
+        alert('No se pudo copiar automáticamente.');
+      }
+      document.body.removeChild(textarea);
+    }
+
+  
+    // --- MODELO DE HOPFIELD ---
+    let ultimoResHopfield = null;
+
+    async function simularHopfield() {
+      const btn = document.getElementById('btn-hopfield');
+      btn.disabled = true; btn.textContent = '⏳ Recuperando...';
+      
+      const datos = {
+        n_neuronas: parseInt(document.getElementById('hf_n').value),
+        n_patrones: parseInt(document.getElementById('hf_p').value),
+        probabilidad_ruido: parseFloat(document.getElementById('hf_ruido').value) / 100,
+        pasos_maximos: parseInt(document.getElementById('hf_pasos').value),
+        semilla: parseInt(document.getElementById('hf_semilla').value)
+      };
+
+      try {
+        const resp = await fetch('/api/hopfield/simular', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(datos)
+        });
+        const res = await resp.json();
+        
+        if (res.ok) {
+          ultimoResHopfield = { datos, res: res.resultado };
+          const r = res.resultado.resultados;
+          const v = res.resultado.visualizacion;
+          
+          document.getElementById('hf_similitud').textContent = (r.similitud * 100).toFixed(1) + '%';
+          document.getElementById('hf_estado').textContent = r.convergencia ? 'Convergió (Atractor)' : 'No convergió';
+          document.getElementById('hf_estado').style.color = r.convergencia ? 'var(--success)' : 'var(--danger)';
+          
+          document.getElementById('hf_e_inicial').textContent = res.resultado.historial.energia[0];
+          document.getElementById('hf_e_final').textContent = r.energia_final;
+          document.getElementById('hf_pasos_ejecutados').textContent = res.resultado.parametros.pasos_ejecutados;
+          
+          dibujarGridHopfield('canvas-hf-inicial', v.grid_inicial, r.lado_grid);
+          dibujarGridHopfield('canvas-hf-final', v.grid_final, r.lado_grid);
+          dibujarEnergiaHopfield(res.resultado.historial.energia);
+          
+          document.getElementById('sec-hopfield-resultados').hidden = false;
+        } else {
+          alert('Error: ' + res.error);
+        }
+      } catch (err) {
+        alert('Error: ' + err);
+      } finally {
+        btn.disabled = false; btn.textContent = '▶️ Ejecutar Recuperación';
+      }
+    }
+
+    function dibujarGridHopfield(canvasId, grid, lado) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      const tamano_celda = Math.floor(250 / lado);
+      canvas.width = lado * tamano_celda;
+      canvas.height = lado * tamano_celda;
+      
+      for (let i = 0; i < lado; i++) {
+        for (let j = 0; j < lado; j++) {
+          const idx = i * lado + j;
+          const valor = idx < grid.length ? grid[idx] : 0;
+          ctx.fillStyle = valor > 0.5 ? '#ef4444' : '#0f172a'; // Rojo = 1, Oscuro = -1
+          ctx.fillRect(j * tamano_celda, i * tamano_celda, tamano_celda, tamano_celda);
+        }
+      }
+    }
+
+    function dibujarEnergiaHopfield(historial_energia) {
+      const canvas = document.getElementById('canvas-hf-energia');
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      const W = rect.width || 600;
+      const H = rect.height || 200;
+      canvas.width = W;
+      canvas.height = H;
+      
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, W, H);
+      
+      const n = historial_energia.length;
+      const e_min = Math.min(...historial_energia);
+      const e_max = Math.max(...historial_energia);
+      const rango_e = e_max - e_min || 1;
+      
+      const escala_x = W / (n - 1);
+      const escala_y = H - 40;
+      
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, H - 20);
+      ctx.lineTo(W, H - 20);
+      ctx.stroke();
+      
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        const x = i * escala_x;
+        const y = H - 20 - ((historial_energia[i] - e_min) / rango_e) * escala_y;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px sans-serif';
+      ctx.fillText('E = ' + e_max, 5, 15);
+      ctx.fillText('E = ' + e_min, 5, H - 25);
+    }
+
+    function copiarHopfield() {
+      if (!ultimoResHopfield) return;
+      const { datos: p, res: r } = ultimoResHopfield;
+      const res = r.resultados;
+      
+      let txt = `# Simulación Red de Hopfield\n\n`;
+      txt += `## Parámetros\n`;
+      txt += `- **Neuronas:** ${p.n_neuronas} | **Patrones:** ${p.n_patrones}\n`;
+      txt += `- **Ruido aplicado:** ${(p.probabilidad_ruido * 100).toFixed(0)}%\n\n`;
+      txt += `## Resultados\n`;
+      txt += `- **Similitud recuperada:** ${(res.similitud * 100).toFixed(1)}%\n`;
+      txt += `- **Estado:** ${res.convergencia ? 'Convergió a atractor' : 'No convergió'}\n`;
+      txt += `- **Energía:** ${r.historial.energia[0]} → ${res.energia_final}\n`;
+      txt += `- **Pasos:** ${r.parametros.pasos_ejecutados}\n\n`;
+      txt += `## Interpretación\n`;
+      if (res.similitud > 0.9) {
+        txt += `La red recuperó el patrón original con éxito a pesar del ruido.\n`;
+      } else if (res.similitud > 0.6) {
+        txt += `La red recuperó parcialmente el patrón, pero quedó atrapada en un mínimo local.\n`;
+      } else {
+        txt += `El ruido fue demasiado alto o la capacidad de la red fue excedida.\n`;
+      }
+      txt += `\n---\n*Generado por NeuroMath Salem — Red de Hopfield*`;
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(() => {
+          const msg = document.getElementById('msg-copiado-hf');
+          msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
+        }).catch(() => copiarConTextareaHF(txt));
+      } else {
+        copiarConTextareaHF(txt);
+      }
+    }
+    
+    function copiarConTextareaHF(texto) {
+      const textarea = document.createElement('textarea');
+      textarea.value = texto;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        const msg = document.getElementById('msg-copiado-hf');
+        msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
+      } catch (err) {
+        alert('No se pudo copiar automáticamente.');
+      }
+      document.body.removeChild(textarea);
+    }
+
+  
+    // --- POTENCIAL DE ACCIÓN (FHN) ---
+    let ultimoResFHN = null;
+
+    function presetFHN(I) {
+      document.getElementById('fhn_I').value = I;
+      document.getElementById('val-I').textContent = I;
+    }
+
+    async function simularFHN() {
+      const btn = document.getElementById('btn-fhn');
+      btn.disabled = true; btn.textContent = '⏳ Simulando...';
+      
+      const datos = {
+        I_ext: parseFloat(document.getElementById('fhn_I').value),
+        tiempo_total: parseFloat(document.getElementById('fhn_tiempo').value),
+        epsilon: parseFloat(document.getElementById('fhn_eps').value),
+        a: parseFloat(document.getElementById('fhn_a').value),
+        b: parseFloat(document.getElementById('fhn_b').value)
+      };
+
+      try {
+        const resp = await fetch('/api/potencial_accion/simular', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(datos)
+        });
+        const res = await resp.json();
+        
+        if (res.ok) {
+          ultimoResFHN = { datos, res: res.resultado };
+          const r = res.resultado.resultados;
+          
+          document.getElementById('fhn_max_V').textContent = r.max_V.toFixed(2);
+          document.getElementById('fhn_estado').textContent = r.estado;
+          document.getElementById('fhn_estado').style.color = 
+            r.color === 'verde' ? '#10b981' : 
+            r.color === 'amarillo' ? '#f59e0b' : '#3b82f6';
+          
+          dibujarFHN(res.resultado.historial);
+          
+          document.getElementById('sec-fhn-resultados').hidden = false;
+        } else {
+          alert('Error: ' + res.error);
+        }
+      } catch (err) {
+        alert('Error: ' + err);
+      } finally {
+        btn.disabled = false; btn.textContent = '▶️ Simular Neurona';
+      }
+    }
+
+    function dibujarFHN(historial) {
+      const canvas = document.getElementById('canvas-fhn');
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      const W = rect.width || 600;
+      const H = rect.height || 300;
+      canvas.width = W;
+      canvas.height = H;
+      
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, W, H);
+      
+      const n = historial.t.length;
+      const t_max = historial.t[n-1];
+      const escala_x = W / t_max;
+      
+      // Encontrar rango de V y W para escalar Y
+      const todos_valores = [...historial.V, ...historial.W];
+      const min_val = Math.min(...todos_valores) - 0.5;
+      const max_val = Math.max(...todos_valores) + 0.5;
+      const rango_y = max_val - min_val;
+      const escala_y = H - 60;
+      
+      // Ejes
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(40, 20);
+      ctx.lineTo(40, H - 40);
+      ctx.lineTo(W - 20, H - 40);
+      ctx.stroke();
+      
+      // Etiquetas de ejes
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '12px sans-serif';
+      ctx.fillText('Tiempo', W/2, H - 10);
+      ctx.save();
+      ctx.translate(15, H/2);
+      ctx.rotate(-Math.PI/2);
+      ctx.fillText('Amplitud', 0, 0);
+      ctx.restore();
+      
+      ctx.fillText(max_val.toFixed(1), 5, 30);
+      ctx.fillText(min_val.toFixed(1), 5, H - 30);
+      
+      // Dibujar V (Voltaje) en azul brillante
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        const x = 40 + historial.t[i] * escala_x;
+        const y = H - 40 - ((historial.V[i] - min_val) / rango_y) * escala_y;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      
+      // Dibujar W (Recuperación) en naranja punteado
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        const x = 40 + historial.t[i] * escala_x;
+        const y = H - 40 - ((historial.W[i] - min_val) / rango_y) * escala_y;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]); // Reset
+      
+      // Leyenda
+      ctx.fillStyle = '#3b82f6';
+      ctx.fillRect(W - 120, 30, 15, 3);
+      ctx.fillStyle = '#f1f5f9';
+      ctx.fillText('V (Voltaje)', W - 100, 35);
+      
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(W - 120, 50, 15, 3);
+      ctx.fillStyle = '#f1f5f9';
+      ctx.fillText('W (Recuperación)', W - 100, 55);
+    }
+
+    function copiarFHN() {
+      if (!ultimoResFHN) return;
+      const { datos: p, res: r } = ultimoResFHN;
+      const res = r.resultados;
+      
+      let txt = `# Simulación de Potencial de Acción\n\n`;
+      txt += `## Parámetros\n`;
+      txt += `- **Corriente externa (I_ext):** ${p.I_ext}\n`;
+      txt += `- **Tiempo:** ${p.tiempo_total}\n`;
+      txt += `- **ε (recuperación):** ${p.epsilon}\n\n`;
+      txt += `## Resultados\n`;
+      txt += `- **Voltaje máximo (V):** ${res.max_V}\n`;
+      txt += `- **Estado:** ${res.estado}\n\n`;
+      txt += `## Interpretación\n`;
+      if (res.estado.includes("Spike")) {
+        txt += `La corriente superó el umbral de disparo. La neurona generó un potencial de acción completo (despolarización rápida seguida de repolarización).\n`;
+      } else if (res.estado.includes("Subumbral")) {
+        txt += `La corriente fue insuficiente para alcanzar el umbral. La neurona mostró solo una respuesta pasiva (potencial graduado) sin disparar.\n`;
+      } else {
+        txt += `La neurona permanece en estado de reposo o hiperpolarización.\n`;
+      }
+      txt += `\n---\n*Generado por NeuroMath Salem — Modelo FitzHugh-Nagumo (Hodgkin-Huxley simplificado)*`;
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(() => {
+          const msg = document.getElementById('msg-copiado-fhn');
+          msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
+        }).catch(() => copiarConTextareaFHN(txt));
+      } else {
+        copiarConTextareaFHN(txt);
+      }
+    }
+    
+    function copiarConTextareaFHN(texto) {
+      const textarea = document.createElement('textarea');
+      textarea.value = texto;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        const msg = document.getElementById('msg-copiado-fhn');
+        msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
+      } catch (err) {
+        alert('No se pudo copiar automáticamente.');
+      }
+      document.body.removeChild(textarea);
+    }
+
+  
+    // --- LANDAU-GINZBURG ---
+    let ultimoResLandau = null;
+
+    function presetLandau(a) {
+      document.getElementById('lg_a').value = a;
+      document.getElementById('val-a').textContent = a;
+    }
+
+    async function calcularLandau() {
+      const btn = document.getElementById('btn-landau');
+      btn.disabled = true; btn.textContent = '⏳ Calculando...';
+      
+      const datos = {
+        a: parseFloat(document.getElementById('lg_a').value),
+        b: parseFloat(document.getElementById('lg_b').value)
+      };
+
+      try {
+        const resp = await fetch('/api/landau/calcular', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(datos)
+        });
+        const res = await resp.json();
+        
+        if (res.ok) {
+          ultimoResLandau = { datos, res: res.resultado };
+          const r = res.resultado;
+          
+          document.getElementById('lg_psi_eq').textContent = '±' + r.psi_eq;
+          document.getElementById('lg_fase').textContent = r.fase;
+          document.getElementById('lg_fase').style.color = 
+            r.color === 'verde' ? '#10b981' : 
+            r.color === 'rojo' ? '#ef4444' : '#f59e0b';
+          document.getElementById('lg_desc').textContent = r.descripcion;
+          document.getElementById('lg_f_min').textContent = r.F_min;
+          
+          dibujarLandau(r.psi, r.F);
+          
+          document.getElementById('sec-landau-resultados').hidden = false;
+        } else {
+          alert('Error: ' + res.error);
+        }
+      } catch (err) {
+        alert('Error: ' + err);
+      } finally {
+        btn.disabled = false; btn.textContent = '▶️ Calcular Potencial';
+      }
+    }
+
+    function dibujarLandau(psi, F) {
+      const canvas = document.getElementById('canvas-landau');
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      const W = rect.width || 600;
+      const H = rect.height || 300;
+      canvas.width = W;
+      canvas.height = H;
+      
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, W, H);
+      
+      const n = psi.length;
+      const psi_min = Math.min(...psi);
+      const psi_max = Math.max(...psi);
+      const F_min = Math.min(...F);
+      const F_max = Math.max(...F);
+      const rango_F = F_max - F_min || 1;
+      
+      const escala_x = (W - 80) / (psi_max - psi_min);
+      const escala_y = (H - 60) / rango_F;
+      
+      // Ejes
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(40, 20);
+      ctx.lineTo(40, H - 40);
+      ctx.lineTo(W - 20, H - 40);
+      ctx.stroke();
+      
+      // Etiquetas
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '12px sans-serif';
+      ctx.fillText('ψ (Parámetro de orden)', W/2, H - 10);
+      ctx.save();
+      ctx.translate(15, H/2);
+      ctx.rotate(-Math.PI/2);
+      ctx.fillText('F (Energía Libre)', 0, 0);
+      ctx.restore();
+      
+      ctx.fillText(F_max.toFixed(1), 5, 30);
+      ctx.fillText(F_min.toFixed(1), 5, H - 30);
+      ctx.fillText(psi_min.toFixed(1), 40, H - 25);
+      ctx.fillText(psi_max.toFixed(1), W - 30, H - 25);
+      ctx.fillText('0', 35, H - 25); // Centro
+      
+      // Curva del potencial
+      ctx.strokeStyle = '#8b5cf6'; // Violeta
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        const x = 40 + (psi[i] - psi_min) * escala_x;
+        const y = H - 40 - ((F[i] - F_min) / rango_F) * escala_y;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      
+      // Marcar el mínimo
+      const idx_min = F.indexOf(F_min);
+      const x_min = 40 + (psi[idx_min] - psi_min) * escala_x;
+      const y_min = H - 40 - ((F[idx_min] - F_min) / rango_F) * escala_y;
+      
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.arc(x_min, y_min, 5, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+
+    function copiarLandau() {
+      if (!ultimoResLandau) return;
+      const { datos: p, res: r } = ultimoResLandau;
+      
+      let txt = `# Teoría de Landau-Ginzburg\n\n`;
+      txt += `## Parámetros\n`;
+      txt += `- **Parámetro a (Control):** ${p.a}\n`;
+      txt += `- **Parámetro b (Estabilidad):** ${p.b}\n\n`;
+      txt += `## Resultados\n`;
+      txt += `- **Fase:** ${r.fase}\n`;
+      txt += `- **Parámetro de orden en equilibrio (ψ_eq):** ±${r.psi_eq}\n`;
+      txt += `- **Energía mínima (F_min):** ${r.F_min}\n`;
+      txt += `- **Descripción:** ${r.descripcion}\n\n`;
+      txt += `## Interpretación\n`;
+      if (p.a < 0) {
+        txt += `El sistema ha sufrido una ruptura espontánea de simetría. El potencial tiene forma de "doble pozo" (sombrero mexicano), y el sistema debe elegir uno de los dos estados estables (ψ > 0 o ψ < 0).\n`;
+      } else if (p.a > 0) {
+        txt += `El sistema está en un único pozo de potencial centrado en ψ = 0. No hay orden espontáneo.\n`;
+      } else {
+        txt += `El sistema está exactamente en el punto crítico. El pozo se aplana y las fluctuaciones dominan.\n`;
+      }
+      txt += `\n---\n*Generado por NeuroMath Salem — Modelo de Landau-Ginzburg*`;
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(() => {
+          const msg = document.getElementById('msg-copiado-lg');
+          msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
+        }).catch(() => copiarConTextareaLG(txt));
+      } else {
+        copiarConTextareaLG(txt);
+      }
+    }
+    
+    function copiarConTextareaLG(texto) {
+      const textarea = document.createElement('textarea');
+      textarea.value = texto;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        const msg = document.getElementById('msg-copiado-lg');
         msg.hidden = false; setTimeout(() => msg.hidden = true, 2500);
       } catch (err) {
         alert('No se pudo copiar automáticamente.');
