@@ -25,6 +25,7 @@
 
 </style>
 <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
     @media print {
@@ -754,9 +755,9 @@
 
     function cambiarPestana(tab) {
       document.querySelectorAll('.contenido-pestaña').forEach(el => el.hidden = true);
-      document.querySelectorAll('.pestaña').forEach(el => el.classList.remove('activa'));
+      document.querySelectorAll('.pestaña-card').forEach(el => el.classList.remove('activa'));
       document.getElementById('tab-' + tab).hidden = false;
-      event.target.classList.add('activa');
+      event.currentTarget.classList.add('activa');
       if (tab === 'historial') cargarSimulaciones();
     }
 

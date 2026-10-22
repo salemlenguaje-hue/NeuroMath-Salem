@@ -469,3 +469,151 @@ input[type="range"] {
   height: auto;
   min-height: 300px;
 }
+
+/* =====================================================
+   PESTAÑAS PROFESIONALES CON ICONOS (Estilo Salem)
+   ===================================================== */
+.pestanas-profesionales {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 30px;
+  padding: 15px 10px;
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--acento) var(--fondo);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.pestaña-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 100px;
+  padding: 16px 12px;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  color: #475569;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pestaña-card i {
+  font-size: 1.8rem;
+  color: #64748b;
+  transition: all 0.3s ease;
+}
+
+.pestaña-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.pestaña-card:hover i {
+  color: var(--acento);
+  transform: scale(1.1);
+}
+
+.pestaña-card.activa {
+  background: linear-gradient(135deg, var(--acento) 0%, #2563eb 100%);
+  color: white;
+  border-color: var(--acento);
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+}
+
+.pestaña-card.activa i {
+  color: white;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  .pestaña-card {
+    min-width: 90px;
+    padding: 12px 8px;
+    font-size: 0.75rem;
+  }
+  .pestaña-card i {
+    font-size: 1.5rem;
+  }
+}
+
+/* Ocultar scrollbar pero mantener funcionalidad */
+.pestanas-profesionales::-webkit-scrollbar {
+  height: 6px;
+}
+.pestanas-profesionales::-webkit-scrollbar-track {
+  background: var(--fondo);
+  border-radius: 3px;
+}
+.pestanas-profesionales::-webkit-scrollbar-thumb {
+  background: var(--acento);
+  border-radius: 3px;
+}
+
+/* =====================================================
+   PESTAÑAS PROFESIONALES CON ICONOS (FORZADO)
+   ===================================================== */
+.pestanas-profesionales {
+  display: flex !important;
+  gap: 12px !important;
+  margin-bottom: 30px !important;
+  padding: 15px 10px !important;
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-radius: 16px !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+}
+
+.pestaña-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  min-width: 100px !important;
+  padding: 16px 12px !important;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+  border: 2px solid transparent !important;
+  border-radius: 12px !important;
+  color: #475569 !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+}
+
+.pestaña-card i {
+  font-size: 1.8rem !important;
+  color: #64748b !important;
+  transition: all 0.3s ease !important;
+}
+
+.pestaña-card:hover {
+  transform: translateY(-4px) !important;
+  background: #ffffff !important;
+}
+
+.pestaña-card:hover i {
+  color: #3b82f6 !important;
+}
+
+.pestaña-card.activa {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+  color: white !important;
+  border-color: #3b82f6 !important;
+}
+
+.pestaña-card.activa i {
+  color: white !important;
+}
